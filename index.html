@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>KasirKu Pro - POS & Inventory</title>
 
-  <!-- PWA & Mobile Meta Tags -->
+  <!-- PWA Meta Tags -->
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="KasirKu Pro">
   <meta name="theme-color" content="#064e3b">
 
-  <!-- Tailwind CSS & FontAwesome CDN -->
+  <!-- Tailwind & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -53,7 +53,7 @@
         </div>
       </div>
 
-      <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2.5">
         <div class="hidden sm:flex flex-col text-right">
           <span id="digital-clock" class="text-xs font-mono font-semibold tracking-wider text-emerald-100">00:00:00</span>
           <div class="text-xs flex items-center space-x-1 justify-end">
@@ -62,7 +62,7 @@
           </div>
         </div>
 
-        <button onclick="openShiftModal()" title="Kelola Shift Kasir" class="bg-emerald-700 hover:bg-emerald-600 px-2.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1 border border-emerald-600">
+        <button onclick="openShiftModal()" title="Kelola Shift" class="bg-emerald-700 hover:bg-emerald-600 px-2.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1 border border-emerald-600">
           <i class="fa-solid fa-clock-rotate-left"></i>
           <span class="hidden md:inline">Shift</span>
         </button>
@@ -77,11 +77,8 @@
 
   <!-- MAIN WRAPPER -->
   <main class="flex-1 flex overflow-hidden">
-    
-    <!-- LEFT PANEL: KATALOG (65% di desktop, 100% di HP) -->
+    <!-- PANEL KATALOG (100% di HP, 65% di Laptop) -->
     <section class="w-full lg:w-8/12 flex flex-col border-r border-slate-200 bg-slate-50">
-      
-      <!-- Search & Category Filters -->
       <div class="p-3 bg-white border-b border-slate-200 flex-shrink-0 space-y-2.5">
         <div class="flex items-center space-x-2">
           <div class="relative flex-1">
@@ -92,17 +89,11 @@
             Reset
           </button>
         </div>
-
-        <div id="category-pills" class="flex items-center space-x-2 overflow-x-auto pb-1 custom-scrollbar text-xs font-medium">
-          <!-- Kategori Dinamis -->
-        </div>
+        <div id="category-pills" class="flex items-center space-x-2 overflow-x-auto pb-1 custom-scrollbar text-xs font-medium"></div>
       </div>
 
-      <!-- Grid Produk -->
       <div class="flex-1 p-3 overflow-y-auto custom-scrollbar pb-24 lg:pb-3">
-        <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          <!-- Kartu Produk Dinamis -->
-        </div>
+        <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
         <div id="empty-product-state" class="hidden text-center py-16 text-slate-400">
           <i class="fa-solid fa-box-open text-4xl mb-2"></i>
           <p class="text-xs">Barang tidak ditemukan.</p>
@@ -110,7 +101,7 @@
       </div>
     </section>
 
-    <!-- RIGHT PANEL: KERANJANG DESKTOP (35%) -->
+    <!-- PANEL KERANJANG DESKTOP (35%) -->
     <section class="hidden lg:flex lg:w-4/12 flex-col bg-white shadow-xl z-10">
       <div class="p-3 border-b border-slate-200 flex justify-between items-center bg-slate-50">
         <div class="flex items-center space-x-2">
@@ -149,7 +140,7 @@
     </section>
   </main>
 
-  <!-- FLOATING BOTTOM BAR KHUSUS LAYAR HP -->
+  <!-- FLOATING BOTTOM BAR KHUSUS HP -->
   <div id="mobile-cart-bar" onclick="toggleMobileCartDrawer()" class="lg:hidden fixed bottom-3 left-3 right-3 bg-emerald-800 text-white rounded-2xl shadow-2xl p-3 flex items-center justify-between z-30 cursor-pointer border border-emerald-600 transition-transform duration-300 translate-y-28">
     <div class="flex items-center space-x-3">
       <div class="relative">
@@ -179,9 +170,7 @@
           <button onclick="toggleMobileCartDrawer()" class="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button>
         </div>
       </div>
-
       <div id="mobile-cart-items-container" class="p-3 space-y-2 overflow-y-auto max-h-[48vh] custom-scrollbar"></div>
-
       <div class="p-3 bg-slate-50 border-t border-slate-200 space-y-2">
         <div class="flex justify-between items-center text-xs">
           <span class="text-slate-500">Diskon</span>
@@ -206,10 +195,7 @@
   <div id="checkout-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden flex flex-col">
       <div class="px-4 py-3 bg-emerald-800 text-white flex justify-between items-center">
-        <h3 class="font-bold text-xs flex items-center space-x-1.5">
-          <i class="fa-solid fa-credit-card"></i>
-          <span>Metode Pembayaran</span>
-        </h3>
+        <h3 class="font-bold text-xs flex items-center space-x-1.5"><i class="fa-solid fa-credit-card"></i><span>Metode Pembayaran</span></h3>
         <button onclick="closeCheckoutModal()" class="text-emerald-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
@@ -220,32 +206,23 @@
         </div>
 
         <div class="grid grid-cols-4 gap-1.5">
-          <button onclick="setPaymentMethod('Cash')" id="btn-method-cash" class="py-1.5 px-1 text-[11px] font-bold rounded-lg border-2 border-emerald-600 bg-emerald-50 text-emerald-800 text-center">
-            <i class="fa-solid fa-money-bill-wave block text-sm mb-0.5"></i>Tunai
-          </button>
-          <button onclick="setPaymentMethod('QRIS')" id="btn-method-qris" class="py-1.5 px-1 text-[11px] font-bold rounded-lg border-2 border-slate-200 hover:border-emerald-400 text-slate-700 text-center">
-            <i class="fa-solid fa-qrcode block text-sm mb-0.5"></i>QRIS
-          </button>
-          <button onclick="setPaymentMethod('Debit')" id="btn-method-debit" class="py-1.5 px-1 text-[11px] font-bold rounded-lg border-2 border-slate-200 hover:border-emerald-400 text-slate-700 text-center">
-            <i class="fa-regular fa-credit-card block text-sm mb-0.5"></i>Debit
-          </button>
-          <button onclick="setPaymentMethod('Transfer')" id="btn-method-transfer" class="py-1.5 px-1 text-[11px] font-bold rounded-lg border-2 border-slate-200 hover:border-emerald-400 text-slate-700 text-center">
-            <i class="fa-solid fa-building-columns block text-sm mb-0.5"></i>Transfer
-          </button>
+          <button onclick="setPaymentMethod('Cash')" id="btn-method-cash" class="py-1.5 px-1 text-[11px] font-bold rounded-lg border-2 border-emerald-600 bg-emerald-50 text-emerald-800 text-center"><i class="fa-solid fa-money-bill-wave block text-sm mb-0.5"></i>Tunai</button>
+          <button onclick="setPaymentMethod('QRIS')" id="btn-method-qris" class="py-1.5 px-1 text-[11px] font-bold rounded-lg border-2 border-slate-200 text-slate-700 text-center"><i class="fa-solid fa-qrcode block text-sm mb-0.5"></i>QRIS</button>
+          <button onclick="setPaymentMethod('Debit')" id="btn-method-debit" class="py-1.5 px-1 text-[11px] font-bold rounded-lg border-2 border-slate-200 text-slate-700 text-center"><i class="fa-regular fa-credit-card block text-sm mb-0.5"></i>Debit</button>
+          <button onclick="setPaymentMethod('Transfer')" id="btn-method-transfer" class="py-1.5 px-1 text-[11px] font-bold rounded-lg border-2 border-slate-200 text-slate-700 text-center"><i class="fa-solid fa-building-columns block text-sm mb-0.5"></i>Transfer</button>
         </div>
 
-        <!-- Cash Section -->
         <div id="section-cash" class="space-y-2 text-xs">
           <div>
             <label class="block font-medium text-slate-700 mb-0.5">Uang Diterima (Rp)</label>
-            <input type="number" id="cash-received-input" oninput="calculateChange()" class="w-full px-2.5 py-1.5 text-base font-bold border border-slate-300 rounded-lg focus:ring-1 focus:ring-emerald-500">
+            <input type="number" id="cash-received-input" oninput="calculateChange()" class="w-full px-2.5 py-1.5 text-base font-bold border border-slate-300 rounded-lg">
           </div>
           <div class="flex flex-wrap gap-1">
-            <button onclick="setCashPreset('exact')" class="px-2 py-0.5 text-[10px] bg-slate-100 hover:bg-slate-200 rounded font-semibold">Uang Pas</button>
-            <button onclick="setCashPreset(10000)" class="px-2 py-0.5 text-[10px] bg-slate-100 hover:bg-slate-200 rounded font-semibold">10k</button>
-            <button onclick="setCashPreset(20000)" class="px-2 py-0.5 text-[10px] bg-slate-100 hover:bg-slate-200 rounded font-semibold">20k</button>
-            <button onclick="setCashPreset(50000)" class="px-2 py-0.5 text-[10px] bg-slate-100 hover:bg-slate-200 rounded font-semibold">50k</button>
-            <button onclick="setCashPreset(100000)" class="px-2 py-0.5 text-[10px] bg-slate-100 hover:bg-slate-200 rounded font-semibold">100k</button>
+            <button onclick="setCashPreset('exact')" class="px-2 py-0.5 text-[10px] bg-slate-100 rounded font-semibold">Uang Pas</button>
+            <button onclick="setCashPreset(10000)" class="px-2 py-0.5 text-[10px] bg-slate-100 rounded font-semibold">10k</button>
+            <button onclick="setCashPreset(20000)" class="px-2 py-0.5 text-[10px] bg-slate-100 rounded font-semibold">20k</button>
+            <button onclick="setCashPreset(50000)" class="px-2 py-0.5 text-[10px] bg-slate-100 rounded font-semibold">50k</button>
+            <button onclick="setCashPreset(100000)" class="px-2 py-0.5 text-[10px] bg-slate-100 rounded font-semibold">100k</button>
           </div>
           <div class="flex justify-between items-center p-2 bg-slate-100 rounded-lg">
             <span class="text-[11px] text-slate-600">Kembalian:</span>
@@ -253,7 +230,6 @@
           </div>
         </div>
 
-        <!-- QRIS Section -->
         <div id="section-qris" class="hidden text-center space-y-1.5 py-1">
           <p class="text-[11px] text-slate-600">Scan QRIS toko berikut:</p>
           <div class="inline-block p-1 bg-white border border-slate-300 rounded-lg">
@@ -261,11 +237,10 @@
           </div>
         </div>
 
-        <!-- Non-Cash Section -->
         <div id="section-noncash" class="hidden p-2.5 bg-blue-50 border border-blue-200 rounded-lg text-center space-y-0.5">
           <i class="fa-solid fa-circle-check text-blue-600 text-lg"></i>
           <p class="text-xs font-bold text-blue-800">Pembayaran Non-Tunai</p>
-          <p class="text-[10px] text-blue-600">Pastikan saldo masuk sebelum menyelesaikan.</p>
+          <p class="text-[10px] text-blue-600">Pastikan mutasi/dana sudah masuk sebelum menyelesaikan.</p>
         </div>
 
         <button onclick="submitTransaction()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow text-xs flex items-center justify-center space-x-1.5">
@@ -276,48 +251,40 @@
     </div>
   </div>
 
-  <!-- STRUK THERMAL MODAL -->
+  <!-- STRUK MODAL -->
   <div id="receipt-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-xs w-full overflow-hidden flex flex-col max-h-[90vh]">
       <div class="p-2.5 bg-slate-800 text-white flex justify-between items-center no-print">
         <span class="font-bold text-xs"><i class="fa-solid fa-receipt mr-1"></i>Struk Kasir</span>
         <button onclick="closeReceiptModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
       <div id="printable-receipt" class="p-3 bg-white text-slate-800 font-mono text-[11px] overflow-y-auto custom-scrollbar">
         <div class="text-center mb-2">
           <h2 id="rcpt-store-name" class="font-extrabold uppercase text-xs">KasirKu Pro</h2>
           <p id="rcpt-store-address" class="text-[9px] text-slate-600 leading-tight">Alamat Toko</p>
           <p id="rcpt-store-phone" class="text-[9px] text-slate-600">0812-xxxx</p>
         </div>
-
         <div class="border-t border-b border-dashed border-slate-400 py-1 mb-2 text-[9px] space-y-0.5">
           <div class="flex justify-between"><span>No:</span><span id="rcpt-invoice-no" class="font-bold">INV-...</span></div>
           <div class="flex justify-between"><span>Waktu:</span><span id="rcpt-timestamp">--</span></div>
           <div class="flex justify-between"><span>Kasir:</span><span id="rcpt-cashier">--</span></div>
           <div class="flex justify-between"><span>Metode:</span><span id="rcpt-payment-method" class="font-bold">--</span></div>
         </div>
-
         <div id="rcpt-items-list" class="space-y-1 mb-2"></div>
-
         <div class="border-t border-dashed border-slate-400 pt-1 space-y-0.5 text-[9px]">
           <div class="flex justify-between"><span>Subtotal:</span><span id="rcpt-subtotal">Rp 0</span></div>
           <div class="flex justify-between"><span>Diskon:</span><span id="rcpt-discount">Rp 0</span></div>
-          <div class="flex justify-between font-bold text-[11px] pt-0.5 border-t border-slate-300">
-            <span>TOTAL:</span><span id="rcpt-grand-total">Rp 0</span>
-          </div>
+          <div class="flex justify-between font-bold text-[11px] pt-0.5 border-t border-slate-300"><span>TOTAL:</span><span id="rcpt-grand-total">Rp 0</span></div>
           <div class="flex justify-between"><span>Bayar:</span><span id="rcpt-cash-received">Rp 0</span></div>
           <div class="flex justify-between"><span>Kembali:</span><span id="rcpt-change">Rp 0</span></div>
         </div>
-
         <div class="text-center mt-2.5 pt-1.5 border-t border-dashed border-slate-400 text-[8px] text-slate-500">
           <p id="rcpt-footer-note">Terima kasih atas kunjungan Anda!</p>
         </div>
       </div>
-
       <div class="p-2.5 bg-slate-100 border-t border-slate-200 flex gap-2 no-print">
         <button onclick="window.print()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 rounded-lg text-xs flex items-center justify-center space-x-1">
-          <i class="fa-solid fa-print"></i><span>Cetak</span>
+          <i class="fa-solid fa-print"></i><span>Cetak Struk</span>
         </button>
       </div>
     </div>
@@ -329,8 +296,8 @@
       <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-2 text-base">
         <i class="fa-solid fa-shield-halved"></i>
       </div>
-      <h3 class="font-bold text-sm text-slate-800">Verifikasi PIN Pemilik</h3>
-      <p class="text-[11px] text-slate-500 mb-3">Masukkan 4-digit PIN Admin:</p>
+      <h3 class="font-bold text-sm text-slate-800">Verifikasi Pemilik</h3>
+      <p class="text-[11px] text-slate-500 mb-3">Masukkan 4-digit PIN Admin Toko:</p>
       <input type="password" id="input-admin-pin" maxlength="6" class="w-32 mx-auto text-center tracking-widest text-xl font-bold py-1.5 border-2 border-slate-300 rounded-lg focus:border-amber-500 focus:outline-none mb-3" placeholder="••••">
       <div class="flex space-x-2">
         <button onclick="closePinModal()" class="flex-1 py-1.5 bg-slate-200 rounded-lg text-xs font-semibold text-slate-700">Batal</button>
@@ -339,7 +306,7 @@
     </div>
   </div>
 
-  <!-- OWNER MODAL (CRUD PRODUK) -->
+  <!-- OWNER PANEL MODAL -->
   <div id="owner-panel-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3 md:p-6">
     <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full h-[90vh] flex flex-col overflow-hidden">
       <div class="px-5 py-3.5 bg-slate-900 text-white flex justify-between items-center flex-shrink-0">
@@ -348,13 +315,18 @@
           <h2 class="font-bold text-sm">Kelola Produk & Inventaris</h2>
         </div>
         <div class="flex items-center space-x-2">
+          <button onclick="openCashierManagerModal()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1">
+            <i class="fa-solid fa-users"></i><span>Kasir</span>
+          </button>
+          <button onclick="openStoreSettingsModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1">
+            <i class="fa-solid fa-gear"></i><span>Profil Toko</span>
+          </button>
           <button onclick="openProductFormModal('create')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1">
             <i class="fa-solid fa-plus"></i><span>Tambah Barang</span>
           </button>
           <button onclick="closeOwnerPanel()" class="text-slate-400 hover:text-white px-1.5"><i class="fa-solid fa-xmark text-base"></i></button>
         </div>
       </div>
-
       <div class="flex-1 overflow-y-auto p-3 custom-scrollbar bg-slate-50">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <table class="w-full text-left border-collapse text-xs">
@@ -375,14 +347,13 @@
     </div>
   </div>
 
-  <!-- FORM PRODUK MODAL -->
+  <!-- FORM PRODUK (DENGAN UPLOAD FOTO LANGSUNG) -->
   <div id="product-form-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden flex flex-col">
       <div class="px-4 py-3 bg-slate-800 text-white flex justify-between items-center">
         <h3 id="form-product-title" class="font-bold text-xs">Tambah Barang</h3>
         <button onclick="closeProductFormModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
       <form id="product-form" onsubmit="handleProductSubmit(event)" class="p-4 space-y-2.5 text-xs overflow-y-auto max-h-[75vh] custom-scrollbar">
         <input type="hidden" id="pform-id">
         <div>
@@ -392,42 +363,146 @@
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block font-medium text-slate-700 mb-0.5">Kategori *</label>
-            <input type="text" id="pform-category" required class="w-full px-2.5 py-1.5 border rounded-lg focus:ring-1 focus:ring-emerald-500">
+            <input type="text" id="pform-category" required class="w-full px-2.5 py-1.5 border rounded-lg">
           </div>
           <div>
             <label class="block font-medium text-slate-700 mb-0.5">Varian/Satuan</label>
-            <input type="text" id="pform-variant" placeholder="500ml / Pouch" class="w-full px-2.5 py-1.5 border rounded-lg focus:ring-1 focus:ring-emerald-500">
+            <input type="text" id="pform-variant" placeholder="500ml / Bungkus" class="w-full px-2.5 py-1.5 border rounded-lg">
           </div>
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block font-medium text-slate-700 mb-0.5">Modal HPP (Rp) *</label>
-            <input type="number" id="pform-cost" required min="0" class="w-full px-2.5 py-1.5 border rounded-lg focus:ring-1 focus:ring-emerald-500">
+            <input type="number" id="pform-cost" required min="0" class="w-full px-2.5 py-1.5 border rounded-lg">
           </div>
           <div>
             <label class="block font-medium text-slate-700 mb-0.5">Harga Jual (Rp) *</label>
-            <input type="number" id="pform-price" required min="0" class="w-full px-2.5 py-1.5 border rounded-lg focus:ring-1 focus:ring-emerald-500">
+            <input type="number" id="pform-price" required min="0" class="w-full px-2.5 py-1.5 border rounded-lg">
           </div>
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block font-medium text-slate-700 mb-0.5">Stok Fisik *</label>
-            <input type="number" id="pform-stock" required min="0" class="w-full px-2.5 py-1.5 border rounded-lg focus:ring-1 focus:ring-emerald-500">
+            <input type="number" id="pform-stock" required min="0" class="w-full px-2.5 py-1.5 border rounded-lg">
           </div>
           <div>
             <label class="block font-medium text-slate-700 mb-0.5">Min Stok *</label>
-            <input type="number" id="pform-min-stock" required min="1" class="w-full px-2.5 py-1.5 border rounded-lg focus:ring-1 focus:ring-emerald-500">
+            <input type="number" id="pform-min-stock" required min="1" class="w-full px-2.5 py-1.5 border rounded-lg">
           </div>
         </div>
+        
+        <!-- Upload Foto Produk -->
         <div>
-          <label class="block font-medium text-slate-700 mb-0.5">URL Gambar (Direct Link)</label>
-          <input type="url" id="pform-url-input" placeholder="https://..." class="w-full px-2.5 py-1.5 border rounded-lg focus:ring-1 focus:ring-emerald-500">
+          <label class="block font-medium text-slate-700 mb-0.5">Foto Produk (Dari Galeri / Kamera HP)</label>
+          <div class="flex items-center space-x-2">
+            <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700 flex items-center space-x-1.5 flex-1">
+              <i class="fa-solid fa-camera text-emerald-700"></i>
+              <span id="label-pform-img">Pilih Foto Produk</span>
+              <input type="file" id="file-pform-img" accept="image/*" class="hidden" onchange="previewUpload(this, 'img-preview-pform', 'label-pform-img')">
+            </label>
+            <img id="img-preview-pform" src="" class="w-9 h-9 rounded-lg object-cover border hidden bg-white">
+          </div>
+          <input type="hidden" id="base64-pform-img">
         </div>
+
         <div class="flex justify-end space-x-2 pt-2 border-t border-slate-200">
           <button type="button" onclick="closeProductFormModal()" class="px-3 py-1.5 bg-slate-200 rounded-lg text-slate-700 font-semibold">Batal</button>
           <button type="submit" class="px-4 py-1.5 bg-emerald-600 text-white rounded-lg font-bold">Simpan</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL PROFIL TOKO (DENGAN UPLOAD FOTO & QRIS) -->
+  <div id="store-settings-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden flex flex-col">
+      <div class="px-4 py-3 bg-emerald-800 text-white flex justify-between items-center">
+        <h3 class="font-bold text-xs flex items-center space-x-1.5">
+          <i class="fa-solid fa-store"></i>
+          <span>Pengaturan Identitas Toko</span>
+        </h3>
+        <button onclick="closeStoreSettingsModal()" class="text-emerald-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="store-settings-form" onsubmit="handleStoreSettingsSubmit(event)" class="p-4 space-y-2.5 text-xs overflow-y-auto max-h-[75vh] custom-scrollbar">
+        <div>
+          <label class="block font-medium text-slate-700 mb-0.5">Nama Toko *</label>
+          <input type="text" id="set-store-name" required class="w-full px-2.5 py-1.5 border rounded-lg focus:ring-1 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-0.5">Alamat Lengkap Toko</label>
+          <textarea id="set-store-address" rows="2" class="w-full px-2.5 py-1.5 border rounded-lg focus:ring-1 focus:ring-emerald-500"></textarea>
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-0.5">Nomor Telepon / WhatsApp Toko</label>
+          <input type="text" id="set-store-phone" placeholder="0812-xxxx" class="w-full px-2.5 py-1.5 border rounded-lg">
+        </div>
+        
+        <!-- Upload Langsung Logo Toko -->
+        <div>
+          <label class="block font-medium text-slate-700 mb-0.5">Logo Toko (Upload dari Kamera/HP)</label>
+          <div class="flex items-center space-x-2">
+            <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700 flex items-center space-x-1.5 flex-1">
+              <i class="fa-solid fa-camera text-emerald-700"></i>
+              <span id="label-set-logo">Pilih Foto Logo</span>
+              <input type="file" id="file-set-logo" accept="image/*" class="hidden" onchange="previewUpload(this, 'img-preview-logo', 'label-set-logo')">
+            </label>
+            <img id="img-preview-logo" src="" class="w-9 h-9 rounded-lg object-cover border hidden bg-white">
+          </div>
+          <input type="hidden" id="base64-set-logo">
+        </div>
+
+        <!-- Upload Langsung Gambar QRIS -->
+        <div>
+          <label class="block font-medium text-slate-700 mb-0.5">Gambar QRIS Toko (Upload dari Galeri/HP)</label>
+          <div class="flex items-center space-x-2">
+            <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700 flex items-center space-x-1.5 flex-1">
+              <i class="fa-solid fa-qrcode text-emerald-700"></i>
+              <span id="label-set-qris">Pilih Gambar QRIS</span>
+              <input type="file" id="file-set-qris" accept="image/*" class="hidden" onchange="previewUpload(this, 'img-preview-qris', 'label-set-qris')">
+            </label>
+            <img id="img-preview-qris" src="" class="w-9 h-9 rounded-lg object-cover border hidden bg-white">
+          </div>
+          <input type="hidden" id="base64-set-qris">
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-0.5">Catatan Kaki Struk</label>
+          <input type="text" id="set-store-footer" placeholder="Terima kasih atas kunjungan Anda!" class="w-full px-2.5 py-1.5 border rounded-lg">
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-2 border-t border-slate-200">
+          <button type="button" onclick="closeStoreSettingsModal()" class="px-3 py-1.5 bg-slate-200 rounded-lg text-slate-700 font-semibold">Batal</button>
+          <button type="submit" class="px-4 py-1.5 bg-emerald-600 text-white rounded-lg font-bold">Simpan Profil</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL KELOLA KASIR -->
+  <div id="cashier-manager-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-xs w-full overflow-hidden flex flex-col">
+      <div class="px-4 py-3 bg-emerald-800 text-white flex justify-between items-center">
+        <h3 class="font-bold text-xs flex items-center space-x-1.5">
+          <i class="fa-solid fa-user-gear"></i>
+          <span>Daftar Kasir Toko</span>
+        </h3>
+        <button onclick="closeCashierManagerModal()" class="text-emerald-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="p-4 space-y-3 text-xs">
+        <div class="flex space-x-1.5">
+          <input type="text" id="input-new-cashier" placeholder="Nama kasir baru..." class="flex-1 px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500">
+          <button onclick="handleAddCashier()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-bold text-xs">
+            Tambah
+          </button>
+        </div>
+
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <p class="bg-slate-100 px-3 py-1.5 font-bold text-[10px] text-slate-500 uppercase tracking-wider">Kasir Aktif</p>
+          <div id="cashier-list-container" class="divide-y divide-slate-100 max-h-48 overflow-y-auto custom-scrollbar"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -454,12 +529,16 @@
     <p id="loading-text" class="text-white text-xs font-bold">Memproses...</p>
   </div>
 
-  <!-- ==================== JAVASCRIPT REST API (GITHUB PAGES) ==================== -->
+  <!-- ==================== LOGIKA JAVASCRIPT HYBRID & UPLOAD ==================== -->
   <script>
-    // --- GANTI URL INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA ---
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfyc.../exec';
+    // --- GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA ---
+    const SCRIPT_URL = 'GANTI_DENGAN_URL_WEB_APP_GAS_ANDA';
 
-    // Registrasi PWA Service Worker
+    // Deteksi Toko dari Parameter URL (?store=TOKO-001)
+    const urlParams = new URLSearchParams(window.location.search);
+    const ACTIVE_STORE_ID = urlParams.get('store') || '';
+
+    // Register Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW Error', err));
@@ -470,7 +549,7 @@
       settings: {},
       activeShift: null,
       products: [],
-      cashiers: ['Nurul Fajri', 'Kasir Utama'],
+      cashiers: ['Kasir Utama'],
       currentPin: '',
       cart: [],
       selectedCategory: 'Semua',
@@ -490,7 +569,7 @@
       }, 1000);
     }
 
-    function showLoading(txt = 'Memproses data...') {
+    function showLoading(txt = 'Memproses...') {
       document.getElementById('loading-text').innerText = txt;
       document.getElementById('loading-overlay').classList.remove('hidden');
     }
@@ -508,9 +587,53 @@
       setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3000);
     }
 
-    // --- FETCH ENGINE KE GOOGLE APPS SCRIPT ---
+    // --- LOGIKA UPLOAD & KOMPRESI BASE64 FOTO HP ---
+    function previewUpload(inputElement, previewImgId, labelTextId) {
+      const file = inputElement.files[0];
+      if (!file) return;
+
+      document.getElementById(labelTextId).innerText = file.name;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxDim = 800; // Kompresi max lebar 800px agar cepat diupload
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height && width > maxDim) {
+            height *= maxDim / width;
+            width = maxDim;
+          } else if (height > maxDim) {
+            width *= maxDim / height;
+            height = maxDim;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          
+          const previewImg = document.getElementById(previewImgId);
+          previewImg.src = compressedBase64;
+          previewImg.classList.remove('hidden');
+
+          if (previewImgId === 'img-preview-logo') document.getElementById('base64-set-logo').value = compressedBase64;
+          if (previewImgId === 'img-preview-qris') document.getElementById('base64-set-qris').value = compressedBase64;
+          if (previewImgId === 'img-preview-pform') document.getElementById('base64-pform-img').value = compressedBase64;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // --- FETCH API REST ROUTER ---
     async function apiGet(action, params = {}) {
-      const query = new URLSearchParams({ action, ...params }).toString();
+      const query = new URLSearchParams({ action, storeId: ACTIVE_STORE_ID, ...params }).toString();
       const res = await fetch(`${SCRIPT_URL}?${query}`);
       return await res.json();
     }
@@ -518,14 +641,14 @@
     async function apiPost(action, payload = {}, pin = '') {
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // GAS redirect safe
-        body: JSON.stringify({ action, payload, pin })
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action, storeId: ACTIVE_STORE_ID, payload, pin })
       });
       return await res.json();
     }
 
     async function loadAppInitialData() {
-      showLoading('Mengambil katalog toko...');
+      showLoading('Mengambil data toko...');
       try {
         const res = await apiGet('getInitialState');
         if (res.success) {
@@ -545,7 +668,7 @@
           showToast(res.message, 'error');
         }
       } catch (err) {
-        showToast('Koneksi ke spreadsheet gagal: ' + err.message, 'error');
+        showToast('Koneksi database gagal: ' + err.message, 'error');
       } finally {
         hideLoading();
       }
@@ -651,7 +774,7 @@
         removeFromCart(productId);
       } else {
         if (newQty > item.maxStock) {
-          showToast('Melebihi batas stok', 'error');
+          showToast('Melebihi batas stok barang', 'error');
           return;
         }
         item.quantity = newQty;
@@ -688,7 +811,6 @@
       const subtotal = appState.cart.reduce((s, i) => s + (i.price * i.quantity), 0);
       const grandTotal = Math.max(0, subtotal - appState.discount);
 
-      // Desktop Elements
       const countLbl = document.getElementById('cart-item-count');
       const btnPay = document.getElementById('btn-proceed-pay');
       if (countLbl) countLbl.innerText = totalItems;
@@ -719,7 +841,6 @@
         }
       }
 
-      // Mobile Elements
       const mobileBar = document.getElementById('mobile-cart-bar');
       const mobileBadge = document.getElementById('mobile-cart-badge');
       const mobileTotal = document.getElementById('mobile-cart-total');
@@ -841,7 +962,7 @@
         items: appState.cart
       };
 
-      showLoading('Menyimpan ke database...');
+      showLoading('Menyimpan transaksi...');
       try {
         const res = await apiPost('saveTransaction', payload);
         if (res.success) {
@@ -862,13 +983,13 @@
           showToast(res.message, 'error');
         }
       } catch (err) {
-        showToast('Gagal memproses transaksi: ' + err.message, 'error');
+        showToast('Gagal transaksi: ' + err.message, 'error');
       } finally {
         hideLoading();
       }
     }
 
-    // --- STRUK ---
+    // --- STRUK THERMAL ---
     function openReceiptModal(data) {
       document.getElementById('rcpt-store-name').innerText = appState.settings.store_name || 'KasirKu Pro';
       document.getElementById('rcpt-store-address').innerText = appState.settings.store_address || '';
@@ -931,7 +1052,7 @@
     }
 
     async function openOwnerPanel() {
-      showLoading('Mengambil data inventaris...');
+      showLoading('Mengambil inventaris...');
       try {
         const res = await apiGet('getAllProducts', { pin: appState.currentPin });
         if (res.success) {
@@ -967,9 +1088,13 @@
       `).join('');
     }
 
+    // --- FORM PRODUK & UPLOAD FOTO BARANG ---
     function openProductFormModal(mode) {
       document.getElementById('product-form').reset();
       document.getElementById('pform-id').value = '';
+      document.getElementById('base64-pform-img').value = '';
+      document.getElementById('img-preview-pform').classList.add('hidden');
+      document.getElementById('label-pform-img').innerText = 'Pilih Foto Produk';
       document.getElementById('form-product-title').innerText = mode === 'create' ? 'Tambah Produk' : 'Edit Produk';
       document.getElementById('product-form-modal').classList.remove('hidden');
     }
@@ -984,7 +1109,10 @@
       document.getElementById('pform-price').value = p.selling_price;
       document.getElementById('pform-stock').value = p.stock;
       document.getElementById('pform-min-stock').value = p.min_stock;
-      document.getElementById('pform-url-input').value = p.image_url || '';
+      if (p.image_url) {
+        document.getElementById('img-preview-pform').src = p.image_url;
+        document.getElementById('img-preview-pform').classList.remove('hidden');
+      }
     }
 
     function closeProductFormModal() {
@@ -993,7 +1121,7 @@
 
     async function handleProductSubmit(e) {
       e.preventDefault();
-      showLoading('Menyimpan produk...');
+      showLoading('Mengunggah & menyimpan produk...');
       const payload = {
         id: document.getElementById('pform-id').value,
         name: document.getElementById('pform-name').value.trim(),
@@ -1003,7 +1131,7 @@
         selling_price: Number(document.getElementById('pform-price').value) || 0,
         stock: Number(document.getElementById('pform-stock').value) || 0,
         min_stock: Number(document.getElementById('pform-min-stock').value) || 0,
-        image_url: document.getElementById('pform-url-input').value.trim(),
+        image_base64: document.getElementById('base64-pform-img').value || null,
         is_active: true
       };
 
@@ -1036,6 +1164,160 @@
           }
         } catch (err) {
           showToast('Gagal hapus', 'error');
+        } finally {
+          hideLoading();
+        }
+      }
+    }
+
+    // --- PROFIL TOKO (DENGAN FOTO & QRIS HP) ---
+    function openStoreSettingsModal() {
+      document.getElementById('set-store-name').value = appState.settings.store_name || '';
+      document.getElementById('set-store-address').value = appState.settings.store_address || '';
+      document.getElementById('set-store-phone').value = appState.settings.store_phone || '';
+      document.getElementById('set-store-footer').value = appState.settings.footer_note || '';
+
+      const prevLogo = document.getElementById('img-preview-logo');
+      if (appState.settings.store_logo_url) {
+        prevLogo.src = appState.settings.store_logo_url;
+        prevLogo.classList.remove('hidden');
+      } else {
+        prevLogo.classList.add('hidden');
+      }
+
+      const prevQris = document.getElementById('img-preview-qris');
+      if (appState.settings.qris_image_url) {
+        prevQris.src = appState.settings.qris_image_url;
+        prevQris.classList.remove('hidden');
+      } else {
+        prevQris.classList.add('hidden');
+      }
+
+      document.getElementById('base64-set-logo').value = '';
+      document.getElementById('base64-set-qris').value = '';
+      document.getElementById('label-set-logo').innerText = 'Pilih Foto Logo';
+      document.getElementById('label-set-qris').innerText = 'Pilih Gambar QRIS';
+
+      document.getElementById('store-settings-modal').classList.remove('hidden');
+    }
+
+    function closeStoreSettingsModal() {
+      document.getElementById('store-settings-modal').classList.add('hidden');
+    }
+
+    async function handleStoreSettingsSubmit(e) {
+      e.preventDefault();
+      showLoading('Mengunggah & menyimpan profil toko...');
+
+      const payload = {
+        store_name: document.getElementById('set-store-name').value.trim(),
+        store_address: document.getElementById('set-store-address').value.trim(),
+        store_phone: document.getElementById('set-store-phone').value.trim(),
+        footer_note: document.getElementById('set-store-footer').value.trim(),
+        store_logo_url: appState.settings.store_logo_url || '',
+        qris_image_url: appState.settings.qris_image_url || '',
+        logo_base64: document.getElementById('base64-set-logo').value || null,
+        qris_base64: document.getElementById('base64-set-qris').value || null
+      };
+
+      try {
+        const res = await apiPost('saveStoreSettings', payload, appState.currentPin);
+        if (res.success) {
+          showToast(res.message);
+          closeStoreSettingsModal();
+          if (res.data) {
+            if (res.data.store_logo_url) payload.store_logo_url = res.data.store_logo_url;
+            if (res.data.qris_image_url) payload.qris_image_url = res.data.qris_image_url;
+          }
+          appState.settings = { ...appState.settings, ...payload };
+          document.getElementById('topbar-store-name').innerText = payload.store_name;
+          document.getElementById('topbar-subtext').innerText = payload.store_address;
+          if (payload.store_logo_url) document.getElementById('topbar-logo').src = payload.store_logo_url;
+        } else {
+          showToast(res.message, 'error');
+        }
+      } catch (err) {
+        showToast('Gagal simpan profil: ' + err.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // --- KELOLA KASIR MANDIRI ---
+    function openCashierManagerModal() {
+      renderCashierList();
+      document.getElementById('input-new-cashier').value = '';
+      document.getElementById('cashier-manager-modal').classList.remove('hidden');
+    }
+
+    function closeCashierManagerModal() {
+      document.getElementById('cashier-manager-modal').classList.add('hidden');
+    }
+
+    function renderCashierList() {
+      const container = document.getElementById('cashier-list-container');
+      if (!appState.cashiers || appState.cashiers.length === 0) {
+        container.innerHTML = '<p class="p-3 text-slate-400 text-center text-xs">Belum ada kasir</p>';
+        return;
+      }
+
+      container.innerHTML = appState.cashiers.map(c => `
+        <div class="px-3 py-2 flex items-center justify-between hover:bg-slate-50">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-user text-slate-400 text-xs"></i>
+            <span class="font-bold text-slate-700">${c}</span>
+          </div>
+          <button onclick="handleDeleteCashier('${c}')" class="text-rose-500 hover:text-rose-700 p-1" title="Hapus Kasir">
+            <i class="fa-solid fa-trash-can text-xs"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function handleAddCashier() {
+      const name = document.getElementById('input-new-cashier').value.trim();
+      if (!name) {
+        showToast('Ketik nama kasir terlebih dahulu', 'error');
+        return;
+      }
+
+      showLoading('Menambahkan kasir...');
+      try {
+        const res = await apiPost('manageCashier', { subAction: 'ADD', name: name }, appState.currentPin);
+        if (res.success) {
+          showToast(res.message);
+          appState.cashiers = res.data;
+          document.getElementById('input-new-cashier').value = '';
+          renderCashierList();
+        } else {
+          showToast(res.message, 'error');
+        }
+      } catch (err) {
+        showToast('Gagal tambah kasir: ' + err.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function handleDeleteCashier(name) {
+      if (appState.cashiers.length <= 1) {
+        showToast('Minimal harus ada 1 kasir aktif di toko!', 'error');
+        return;
+      }
+
+      if (confirm(`Hapus kasir "${name}"?`)) {
+        showLoading('Menghapus kasir...');
+        try {
+          const res = await apiPost('manageCashier', { subAction: 'DELETE', name: name }, appState.currentPin);
+          if (res.success) {
+            showToast(res.message);
+            appState.cashiers = res.data;
+            renderCashierList();
+          } else {
+            showToast(res.message, 'error');
+          }
+        } catch (err) {
+          showToast('Gagal hapus kasir: ' + err.message, 'error');
         } finally {
           hideLoading();
         }
