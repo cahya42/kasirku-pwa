@@ -367,18 +367,13 @@
           </div>
         </div>
           
-        <!-- TAB NAVIGASI PANEL PEMILIK -->
-        <div class="flex space-x-2 border-b border-slate-200 pb-2">
-          <button type="button" id="tab-btn-products" onclick="switchOwnerTab('products')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm">
-            <i class="fa-solid fa-boxes-stacked"></i>
-            <span>Daftar Barang</span>
-          </button>
+        <!-- Tab Navigasi Pemilik -->
+        <div class="flex items-center gap-2 mb-4 border-b border-slate-200 pb-3">
           <button type="button" id="tab-btn-products" onclick="switchOwnerTab('products')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm flex items-center">
-          <i class="fa-solid fa-boxes-stacked mr-1.5"></i>Daftar Barang
+            <i class="fa-solid fa-boxes-stacked mr-1.5"></i>Daftar Barang
           </button>
-
           <button type="button" id="tab-btn-transactions" onclick="switchOwnerTab('transactions')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center">
-          <i class="fa-solid fa-receipt mr-1.5"></i>Riwayat Transaksi Hari Ini
+            <i class="fa-solid fa-receipt mr-1.5"></i>Riwayat Transaksi Hari Ini
           </button>
         </div>
 
@@ -707,11 +702,10 @@ async function switchOwnerTab(tab) {
       currentOwnerTab = tab;
       const thead = document.querySelector('#owner-panel-modal table thead tr');
       const tbody = document.getElementById('owner-product-table-body');
-      const btnProducts = document.getElementById('tab-btn-products') || document.querySelector("button[onclick*='products']");
-      const btnTrx = document.getElementById('tab-btn-transactions') || document.querySelector("button[onclick*='transactions']");
+      const btnProducts = document.getElementById('tab-btn-products');
+      const btnTrx = document.getElementById('tab-btn-transactions');
 
       if (tab === 'products') {
-        // Ganti warna tombol aktif
         if (btnProducts) {
           btnProducts.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm flex items-center';
         }
@@ -719,7 +713,6 @@ async function switchOwnerTab(tab) {
           btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center';
         }
 
-        // Header tabel Produk
         if (thead) {
           thead.innerHTML = `
             <th class="p-2.5">BARCODE / ID</th>
@@ -734,11 +727,14 @@ async function switchOwnerTab(tab) {
 
         showLoading('Mengambil data produk...');
         try {
-          const res = await apiGet('getAllProducts', { pin: appState.currentPin });
-          if (res && res.success) {
-            renderOwnerTable(res.data);
+          const pin = (appState && appState.currentPin) || '1234';
+          const storeId = (appState && appState.currentStoreId) || new URLSearchParams(window.location.search).get('store') || 'TOKO-001';
+          const res = await fetch(`${SCRIPT_URL}?action=getAllProducts&pin=${encodeURIComponent(pin)}&storeId=${encodeURIComponent(storeId)}`);
+          const data = await res.json();
+          if (data && data.success) {
+            renderOwnerTable(data.data);
           } else {
-            if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-500 font-bold">${res ? res.message : 'Gagal memuat barang'}</td></tr>`;
+            if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-500 font-bold">${data ? data.message : 'Gagal memuat barang'}</td></tr>`;
           }
         } catch (e) {
           if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-500 font-bold">Gagal memuat barang</td></tr>`;
@@ -747,7 +743,6 @@ async function switchOwnerTab(tab) {
         }
 
       } else if (tab === 'transactions') {
-        // Ganti warna tombol aktif
         if (btnTrx) {
           btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm flex items-center';
         }
@@ -755,7 +750,6 @@ async function switchOwnerTab(tab) {
           btnProducts.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center';
         }
 
-        // Header tabel Transaksi
         if (thead) {
           thead.innerHTML = `
             <th class="p-2.5">NO. NOTA</th>
@@ -768,7 +762,7 @@ async function switchOwnerTab(tab) {
           `;
         }
 
-        // Panggil pemuatan transaksi yang menggunakan fetch langsung
+        // Panggil fungsi pengambilan data transaksi
         loadTodayTransactionsList();
       }
     }
