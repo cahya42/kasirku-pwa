@@ -592,7 +592,9 @@
   <script>
     // URL Web App GAS Anda
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4L5YTqlWkZHtUe9Nz2X-kyDp6Hv_sJx4hxS9D3Z0jWwA066jMSzkh7zesWNrG3LyL/exec';
-
+    
+    // Variabel Global
+    let currentOwnerTab = 'products';
     // Deteksi Toko dari Parameter URL (?store=TOKO-001) dengan default TOKO-001
     const urlParams = new URLSearchParams(window.location.search);
     const ACTIVE_STORE_ID = urlParams.get('store') || 'TOKO-001';
@@ -1281,7 +1283,6 @@ function switchOwnerTab(tab) {
         console.warn('Gagal memuat badge offline:', err);
       }
     }
-    let currentOwnerTab = 'products';
 
     function switchOwnerTab(tab) {
       currentOwnerTab = tab;
