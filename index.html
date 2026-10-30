@@ -700,55 +700,30 @@
 currentOwnerTab = 'products';
 
 // FUNGSI GANTI TAB PANEL PEMILIK
-    function switchOwnerTab(tab) {
+function switchOwnerTab(tab) {
       currentOwnerTab = tab;
-      const btnProd = document.getElementById('tab-btn-products');
-      const btnTrx = document.getElementById('tab-btn-trx');
-      const thead = document.getElementById('owner-table-head');
-      const tbody = document.getElementById('owner-product-table-body');
-
-      if (!tbody) return;
+      const btnProducts = document.getElementById('tab-btn-products');
+      const btnTrx = document.getElementById('tab-btn-transactions');
 
       if (tab === 'products') {
-        if (btnProd) btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm';
-        if (btnTrx) btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition flex items-center space-x-1.5';
-        
-        if (thead) {
-          thead.innerHTML = `
-            <tr>
-              <th class="p-2.5">Barcode / ID</th>
-              <th class="p-2.5">Nama Produk</th>
-              <th class="p-2.5">Kategori</th>
-              <th class="p-2.5 text-right">Modal</th>
-              <th class="p-2.5 text-right">Harga Jual</th>
-              <th class="p-2.5 text-center">Stok</th>
-              <th class="p-2.5 text-center">Aksi</th>
-            </tr>
-          `;
+        if (btnProducts) {
+          btnProducts.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm flex items-center';
         }
-        // Tampilkan barang kembali
-        renderOwnerProductTable();
-      } else {
-        if (btnTrx) btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm';
-        if (btnProd) btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition flex items-center space-x-1.5';
-        
-        if (thead) {
-          thead.innerHTML = `
-            <tr>
-              <th class="p-2.5">No. Nota</th>
-              <th class="p-2.5">Waktu</th>
-              <th class="p-2.5">Kasir</th>
-              <th class="p-2.5">Metode</th>
-              <th class="p-2.5 text-right">Total</th>
-              <th class="p-2.5 text-center">Status</th>
-              <th class="p-2.5 text-center">Aksi</th>
-            </tr>
-          `;
+        if (btnTrx) {
+          btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center';
         }
-
-        // Kosongkan isi tabel dan beri status loading sementara
-        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Memuat riwayat transaksi...</td></tr>';
-        
+        // Muat ulang daftar barang
+        apiGet('getAllProducts', { pin: appState.currentPin }).then(res => {
+          if (res.success) renderOwnerTable(res.data);
+        });
+      } else if (tab === 'transactions') {
+        if (btnTrx) {
+          btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm flex items-center';
+        }
+        if (btnProducts) {
+          btnProducts.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center';
+        }
+        // Panggil fungsi riwayat transaksi yang sudah kita buat
         loadTodayTransactionsList();
       }
     }
