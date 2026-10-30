@@ -1599,32 +1599,34 @@ _${appState.settings.footer_note || 'Terima kasih atas kunjungan Anda!'}_`;
       }
     }
 
-  async function openOwnerPanel() {
-      showLoading('Mengambil inventaris & dashboard...');
-      try {
-        const [prodRes, dashRes] = await Promise.all([
-          apiGet('getAllProducts', { pin: appState.currentPin }),
-          apiGet('getDashboardSummary', { pin: appState.currentPin })
-        ]);
+async function openOwnerPanel() {
+  showLoading('Mengambil inventaris & dashboard...');
+  try {
+    const [prodRes, dashRes] = await Promise.all([
+      apiGet('getAllProducts', { pin: appState.currentPin }),
+      apiGet('getDashboardSummary', { pin: appState.currentPin })
+    ]);
 
-        if (prodRes.success) {
-          if (currentOwnerTab === 'products') {
-            renderOwnerTable(prodRes.data);
-          }
-          if (dashRes.success) {
-            document.getElementById('dash-revenue').innerText = 'Rp ' + dashRes.data.todayRevenue.toLocaleString('id-ID');
-            document.getElementById('dash-profit').innerText = 'Rp ' + dashRes.data.todayProfit.toLocaleString('id-ID');
-            document.getElementById('dash-trx-count').innerText = `${dashRes.data.todayTransactionsCount} Transaksi`;
-            document.getElementById('dash-low-stock').innerText = `${dashRes.data.lowStockItems.length} Produk`;
-          }
-          document.getElementById('owner-panel-modal').classList.remove('hidden');
-        } else {
-          showToast(prodRes.message, 'error');
-        } catch (err) {
-        showToast('Gagal memuat panel pemilik', 'error');
-      } finally {
-        hideLoading();
+    if (prodRes.success) {
+      if (currentOwnerTab === 'products') {
+        renderOwnerTable(prodRes.data);
       }
+      if (dashRes.success) {
+        document.getElementById('dash-revenue').innerText = 'Rp ' + dashRes.data.todayRevenue.toLocaleString('id-ID');
+        document.getElementById('dash-profit').innerText = 'Rp ' + dashRes.data.todayProfit.toLocaleString('id-ID');
+        document.getElementById('dash-trx-count').innerText = `${dashRes.data.todayTransactionsCount} Transaksi`;
+        document.getElementById('dash-low-stock').innerText = `${dashRes.data.lowStockItems.length} Produk`;
+      }
+      document.getElementById('owner-panel-modal').classList.remove('hidden');
+    } else {
+      showToast(prodRes.message, 'error');
+    }
+  } catch (err) {
+    showToast('Gagal memuat panel pemilik', 'error');
+  } finally {
+    hideLoading();
+  }
+}
       
     function closeOwnerPanel() {
       document.getElementById('owner-panel-modal').classList.add('hidden');
