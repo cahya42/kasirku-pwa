@@ -2036,16 +2036,19 @@ async function openOwnerPanel() {
       }
 
       container.innerHTML = transactions.map(t => {
-        const isVoid = t.status === 'VOID';
+        const isVoid = String(t.status).toUpperCase() === 'VOID';
+        const paymentLabel = (t.payment_method === 0 || t.payment_method === '0') ? 'Cash' : (t.payment_method || 'Cash');
+        const statusLabel = isVoid ? 'VOID' : 'SUKSES';
+
         return `
           <tr class="border-b border-slate-100 hover:bg-slate-50 ${isVoid ? 'bg-rose-50/50 opacity-60' : ''}">
             <td class="p-2.5 font-bold">${t.invoice_no}</td>
             <td class="p-2.5">${t.timestamp}</td>
             <td class="p-2.5 font-semibold">${t.cashier_name}</td>
-            <td class="p-2.5">${t.payment_method}</td>
+            <td class="p-2.5">${paymentLabel}</td>
             <td class="p-2.5 text-right font-bold text-emerald-700">Rp ${Number(t.grand_total).toLocaleString('id-ID')}</td>
             <td class="p-2.5 text-center">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isVoid ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">${t.status}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isVoid ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">${statusLabel}</span>
             </td>
             <td class="p-2.5 text-center">
               ${!isVoid ? `
@@ -2058,7 +2061,6 @@ async function openOwnerPanel() {
         `;
       }).join('');
     }
-
     // KONFIRMASI DAN EKSEKUSI VOID TRANSAKSI
     async function confirmVoidTransaction(invoiceNo) {
       if (confirm(`Yakin ingin membatalkan transaksi ${invoiceNo}? Stok barang akan dikembalikan otomatis.`)) {
