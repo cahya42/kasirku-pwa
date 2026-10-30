@@ -1368,7 +1368,7 @@ async function loadTodayTransactionsList() {
         const pin = appState.currentPin || '1234';
         const currentStore = appState.currentStoreId || new URLSearchParams(window.location.search).get('store') || 'TOKO-001';
         
-        // Mengirim storeId agar dikenali backend
+        // Memanggil action getTodayTransactions dengan PIN dan storeId
         const res = await apiGet('getTodayTransactions', { pin: pin, storeId: currentStore });
         
         if (res && res.success) {
@@ -1390,22 +1390,27 @@ async function loadTodayTransactionsList() {
 
     function renderTransactionsTable(transactions) {
       const container = document.getElementById('owner-product-table-body');
+      if (!container) return;
+
       if (!transactions || transactions.length === 0) {
         container.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400">Belum ada transaksi hari ini</td></tr>';
         return;
       }
 
       container.innerHTML = transactions.map(t => {
-        const isVoid = t.status === 'VOID';
+        const isVoid = String(t.status).toUpperCase() === 'VOID';
+        const paymentLabel = (t.payment_method === 0 || t.payment_method === '0') ? 'Cash' : (t.payment_method || 'Cash');
+        const statusLabel = isVoid ? 'VOID' : 'SUKSES';
+
         return `
           <tr class="border-b border-slate-100 hover:bg-slate-50 ${isVoid ? 'bg-rose-50/50 opacity-60' : ''}">
             <td class="p-2.5 font-bold">${t.invoice_no}</td>
             <td class="p-2.5">${t.timestamp}</td>
             <td class="p-2.5 font-semibold">${t.cashier_name}</td>
-            <td class="p-2.5">${t.payment_method}</td>
-            <td class="p-2.5 text-right font-bold text-emerald-700">Rp ${t.grand_total.toLocaleString('id-ID')}</td>
+            <td class="p-2.5">${paymentLabel}</td>
+            <td class="p-2.5 text-right font-bold text-emerald-700">Rp ${Number(t.grand_total).toLocaleString('id-ID')}</td>
             <td class="p-2.5 text-center">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isVoid ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">${t.status}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isVoid ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">${statusLabel}</span>
             </td>
             <td class="p-2.5 text-center">
               ${!isVoid ? `
