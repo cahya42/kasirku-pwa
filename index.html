@@ -1318,20 +1318,7 @@ async function loadTodayTransactionsList() {
         }
       }
     }
-      const payload = {
-        cashier_name: appState.activeShift ? appState.activeShift.cashier_name : 'Kasir',
-        shift_id: appState.activeShift ? appState.activeShift.shift_id : '',
-        total_items: appState.cart.reduce((s, i) => s + i.quantity, 0),
-        subtotal: subtotal,
-        discount: appState.discount,
-        grand_total: grandTotal,
-        payment_method: appState.paymentMethod,
-        cash_received: cashReceived,
-        change: Math.max(0, cashReceived - grandTotal),
-        items: appState.cart
-      };
-
-      showLoading('Menyimpan transaksi...');
+    showLoading('Menyimpan transaksi...');
       try {
         const res = await apiPost('saveTransaction', payload);
         if (res.success) {
