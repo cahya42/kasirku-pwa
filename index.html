@@ -797,8 +797,22 @@
       }).join('');
     }
 
-    // --- SCAN BARCODE KAMERA HP ---
+    // --- SCAN BARCODE KAMERA HP (KASIR & INPUT PRODUK) ---
+    let scannerTarget = 'pos'; // 'pos' atau 'product_form'
+
+    // Untuk Scanner di Halaman Kasir
     function toggleBarcodeScannerModal() {
+      scannerTarget = 'pos';
+      launchCameraScanner();
+    }
+
+    // Untuk Scanner di Modal Tambah/Edit Produk
+    function startScannerForProductForm() {
+      scannerTarget = 'product_form';
+      launchCameraScanner();
+    }
+
+    function launchCameraScanner() {
       document.getElementById('scanner-modal').classList.remove('hidden');
       html5QrCodeScanner = new Html5Qrcode("reader");
       html5QrCodeScanner.start(
@@ -807,14 +821,22 @@
         (decodedText) => {
           stopBarcodeScanner();
           const cleanCode = String(decodedText).trim();
-          const matched = appState.products.find(p => String(p.barcode).trim() === cleanCode);
-          if (matched) {
-            addToCart(matched.id);
-            showToast(`Ditambahkan: ${matched.name}`);
+
+          if (scannerTarget === 'product_form') {
+            // Isi otomatis input barcode pada form produk
+            document.getElementById('pform-barcode').value = cleanCode;
+            showToast(`Barcode terdeteksi: ${cleanCode}`);
           } else {
-            document.getElementById('search-input').value = cleanCode;
-            renderProductGrid();
-            showToast('Barcode ditemukan di pencarian');
+            // Logika untuk halaman kasir
+            const matched = appState.products.find(p => String(p.barcode).trim() === cleanCode);
+            if (matched) {
+              addToCart(matched.id);
+              showToast(`Ditambahkan: ${matched.name}`);
+            } else {
+              document.getElementById('search-input').value = cleanCode;
+              renderProductGrid();
+              showToast('Barcode ditemukan di pencarian');
+            }
           }
         },
         (errorMessage) => { /* live scanning frame */ }
@@ -835,7 +857,6 @@
         document.getElementById('scanner-modal').classList.add('hidden');
       }
     }
-
     // --- KERANJANG ---
     function addToCart(productId) {
       const prod = appState.products.find(p => p.id === productId);
