@@ -699,21 +699,59 @@
     }
 currentOwnerTab = 'products';
 
-function switchOwnerTab(tab) {
-  currentOwnerTab = tab;
-  const btnProd = document.getElementById('tab-btn-products');
-  const btnTrx = document.getElementById('tab-btn-trx');
+// FUNGSI GANTI TAB PANEL PEMILIK
+    function switchOwnerTab(tab) {
+      currentOwnerTab = tab;
+      const btnProd = document.getElementById('tab-btn-products');
+      const btnTrx = document.getElementById('tab-btn-trx');
+      const thead = document.getElementById('owner-table-head');
+      const tbody = document.getElementById('owner-product-table-body');
 
-  if (tab === 'products') {
-    btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition';
-    btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition';
-    openOwnerPanel(); // Memuat ulang tabel inventaris barang
-  } else {
-    btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition';
-    btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition';
-    loadTodayTransactionsList(); // Memuat riwayat transaksi & tombol Void
-  }
-}
+      if (!tbody) return;
+
+      if (tab === 'products') {
+        if (btnProd) btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm';
+        if (btnTrx) btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition flex items-center space-x-1.5';
+        
+        if (thead) {
+          thead.innerHTML = `
+            <tr>
+              <th class="p-2.5">Barcode / ID</th>
+              <th class="p-2.5">Nama Produk</th>
+              <th class="p-2.5">Kategori</th>
+              <th class="p-2.5 text-right">Modal</th>
+              <th class="p-2.5 text-right">Harga Jual</th>
+              <th class="p-2.5 text-center">Stok</th>
+              <th class="p-2.5 text-center">Aksi</th>
+            </tr>
+          `;
+        }
+        // Tampilkan barang kembali
+        renderOwnerProductTable();
+      } else {
+        if (btnTrx) btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm';
+        if (btnProd) btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition flex items-center space-x-1.5';
+        
+        if (thead) {
+          thead.innerHTML = `
+            <tr>
+              <th class="p-2.5">No. Nota</th>
+              <th class="p-2.5">Waktu</th>
+              <th class="p-2.5">Kasir</th>
+              <th class="p-2.5">Metode</th>
+              <th class="p-2.5 text-right">Total</th>
+              <th class="p-2.5 text-center">Status</th>
+              <th class="p-2.5 text-center">Aksi</th>
+            </tr>
+          `;
+        }
+
+        // Kosongkan isi tabel dan beri status loading sementara
+        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Memuat riwayat transaksi...</td></tr>';
+        
+        loadTodayTransactionsList();
+      }
+    }
     // --- FETCH API REST ROUTER ---
     async function apiGet(action, params = {}) {
       const query = new URLSearchParams({ action, storeId: ACTIVE_STORE_ID, ...params }).toString();
@@ -1563,14 +1601,27 @@ _${appState.settings.footer_note || 'Terima kasih atas kunjungan Anda!'}_`;
         ]);
 
         if (prodRes.success) {
+        // Hanya render tabel barang jika tab aktif adalah Daftar Barang
+        if (currentOwnerTab === 'products') {
           renderOwnerTable(prodRes.data);
-          if (dashRes.success) {
-            document.getElementById('dash-revenue').innerText = 'Rp ' + dashRes.data.todayRevenue.toLocaleString('id-ID');
-            document.getElementById('dash-profit').innerText = 'Rp ' + dashRes.data.todayProfit.toLocaleString('id-ID');
-            document.getElementById('dash-trx-count').innerText = `${dashRes.data.todayTransactionsCount} Transaksi`;
-            document.getElementById('dash-low-stock').innerText = `${dashRes.data.lowStockItems.length} Produk`;
-          }
-          document.getElementById('owner-panel-modal').classList.remove('hidden');
+        }
+
+        if (dashRes.success) {
+          document.getElementById('dash-revenue').innerText = 'Rp ' + dashRes.data.todayRevenue.toLocaleString('id-ID');
+          document.getElementById('dash-profit').innerText = 'Rp ' + dashRes.data.todayProfit.toLocaleString('id-ID');
+          document.getElementById('dash-trx-count').innerText = `${dashRes.data.todayTransactionsCount} Transaksi`;
+          document.getElementById('dash-low-stock').innerText = `${dashRes.data.lowStockItems.length} Produk`;
+        }
+        document.getElementById('owner-panel-modal').classList.remove('hidden');
+      } else {
+        showToast(prodRes.message, 'error');
+      }
+    } catch (err) {
+      showToast('Gagal memuat panel pemilik', 'error');
+    } finally {
+      hideLoading();
+    }
+  }
         } else {
           showToast(prodRes.message, 'error');
         }
@@ -1952,16 +2003,21 @@ _${appState.settings.footer_note || 'Terima kasih atas kunjungan Anda!'}_`;
       }
     }
 
-    // MEMUAT RIWAYAT TRANSAKSI DARI GOOGLE APPS SCRIPT
+   // AMBIL DATA TRANSAKSI DARI GAS
     async function loadTodayTransactionsList() {
-      showLoading('Mengambil riwayat transaksi hari ini...');
+      showLoading('Mengambil riwayat transaksi...');
       try {
         const pin = appState.currentPin || '1234';
+        
+        // Panggil endpoint action getTodayTransactions
         const res = await apiGet(`action=getTodayTransactions&pin=${encodeURIComponent(pin)}`);
+        
         if (res && res.success) {
           renderTransactionsTable(res.data);
         } else {
           showToast(res ? res.message : 'Gagal memuat transaksi', 'error');
+          const tbody = document.getElementById('owner-product-table-body');
+          if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-500 font-bold">${res ? res.message : 'Gagal memuat data'}</td></tr>`;
         }
       } catch (err) {
         console.error('Error loadTodayTransactionsList:', err);
