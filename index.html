@@ -700,30 +700,72 @@
 currentOwnerTab = 'products';
 
 // FUNGSI GANTI TAB PANEL PEMILIK
-function switchOwnerTab(tab) {
+async function switchOwnerTab(tab) {
       currentOwnerTab = tab;
-      const btnProducts = document.getElementById('tab-btn-products');
-      const btnTrx = document.getElementById('tab-btn-transactions');
+      const thead = document.querySelector('#owner-panel-modal table thead tr');
+      const tbody = document.getElementById('owner-product-table-body');
+      const btnProducts = document.getElementById('tab-btn-products') || document.querySelector("button[onclick*='products']");
+      const btnTrx = document.getElementById('tab-btn-transactions') || document.querySelector("button[onclick*='transactions']");
 
       if (tab === 'products') {
+        // Ganti warna tombol aktif
         if (btnProducts) {
           btnProducts.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm flex items-center';
         }
         if (btnTrx) {
           btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center';
         }
-        // Muat ulang daftar barang
-        apiGet('getAllProducts', { pin: appState.currentPin }).then(res => {
-          if (res.success) renderOwnerTable(res.data);
-        });
+
+        // Header tabel Produk
+        if (thead) {
+          thead.innerHTML = `
+            <th class="p-2.5">BARCODE / ID</th>
+            <th class="p-2.5">NAMA PRODUK</th>
+            <th class="p-2.5">KATEGORI</th>
+            <th class="p-2.5 text-right">MODAL</th>
+            <th class="p-2.5 text-right">HARGA JUAL</th>
+            <th class="p-2.5 text-center">STOK</th>
+            <th class="p-2.5 text-center">AKSI</th>
+          `;
+        }
+
+        showLoading('Mengambil data produk...');
+        try {
+          const res = await apiGet('getAllProducts', { pin: appState.currentPin });
+          if (res && res.success) {
+            renderOwnerTable(res.data);
+          } else {
+            if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-500 font-bold">${res ? res.message : 'Gagal memuat barang'}</td></tr>`;
+          }
+        } catch (e) {
+          if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-500 font-bold">Gagal memuat barang</td></tr>`;
+        } finally {
+          hideLoading();
+        }
+
       } else if (tab === 'transactions') {
+        // Ganti warna tombol aktif
         if (btnTrx) {
           btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm flex items-center';
         }
         if (btnProducts) {
           btnProducts.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center';
         }
-        // Panggil fungsi riwayat transaksi yang sudah kita buat
+
+        // Header tabel Transaksi
+        if (thead) {
+          thead.innerHTML = `
+            <th class="p-2.5">NO. NOTA</th>
+            <th class="p-2.5">WAKTU</th>
+            <th class="p-2.5">KASIR</th>
+            <th class="p-2.5">METODE</th>
+            <th class="p-2.5 text-right">TOTAL</th>
+            <th class="p-2.5 text-center">STATUS</th>
+            <th class="p-2.5 text-center">AKSI</th>
+          `;
+        }
+
+        // Panggil pemuatan transaksi yang menggunakan fetch langsung
         loadTodayTransactionsList();
       }
     }
