@@ -1365,19 +1365,25 @@ currentOwnerTab = 'products';
 async function loadTodayTransactionsList() {
       showLoading('Mengambil riwayat transaksi...');
       try {
-        const pin = appState.currentPin || '1234';
-        const currentStore = appState.currentStoreId || new URLSearchParams(window.location.search).get('store') || 'TOKO-001';
-        
-        // Memanggil action getTodayTransactions dengan PIN dan storeId
-        const res = await apiGet('getTodayTransactions', { pin: pin, storeId: currentStore });
-        
+        // Ambil storeId dari URL atau appState
+        const urlParams = new URLSearchParams(window.location.search);
+        const storeId = urlParams.get('store') || (appState && appState.currentStoreId) || 'TOKO-001';
+        const pin = (appState && appState.currentPin) || '1234';
+
+        // Kirim action bersama pin dan storeId
+        const res = await apiGet('getTodayTransactions', { 
+          pin: pin, 
+          storeId: storeId 
+        });
+
         if (res && res.success) {
           renderTransactionsTable(res.data);
         } else {
-          showToast(res ? res.message : 'Gagal memuat transaksi', 'error');
+          const msg = res ? res.message : 'Gagal memuat transaksi';
+          showToast(msg, 'error');
           const tbody = document.getElementById('owner-product-table-body');
           if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-500 font-bold">${res ? res.message : 'Gagal memuat data'}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-500 font-bold">${msg}</td></tr>`;
           }
         }
       } catch (err) {
