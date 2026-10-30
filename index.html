@@ -1366,6 +1366,8 @@ async function loadTodayTransactionsList() {
       showLoading('Mengambil riwayat transaksi...');
       try {
         const pin = appState.currentPin || '1234';
+        
+        // PENTING: Gunakan dua argumen seperti baris getAllProducts
         const res = await apiGet('getTodayTransactions', { pin: pin });
         
         if (res && res.success) {
