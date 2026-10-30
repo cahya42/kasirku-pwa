@@ -2039,7 +2039,7 @@ async function openOwnerPanel() {
         const pin = appState.currentPin || '1234';
         
         // Panggil endpoint action getTodayTransactions
-        const res = await apiGet(`action=getTodayTransactions&pin=${encodeURIComponent(pin)}`);
+        const res = await apiGet('getTodayTransactions', { pin: appState.currentPin || '1234' });
         
         if (res && res.success) {
           renderTransactionsTable(res.data);
