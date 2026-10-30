@@ -1906,6 +1906,126 @@ _${appState.settings.footer_note || 'Terima kasih atas kunjungan Anda!'}_`;
         hideLoading();
       }
     }
+    // FUNGSI GANTI TAB PANEL PEMILIK
+    function switchOwnerTab(tab) {
+      currentOwnerTab = tab;
+      const btnProd = document.getElementById('tab-btn-products');
+      const btnTrx = document.getElementById('tab-btn-trx');
+      const thead = document.getElementById('owner-table-head');
+
+      if (tab === 'products') {
+        if (btnProd) btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm';
+        if (btnTrx) btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition flex items-center space-x-1.5';
+        
+        if (thead) {
+          thead.innerHTML = `
+            <tr>
+              <th class="p-2.5">Barcode / ID</th>
+              <th class="p-2.5">Nama Produk</th>
+              <th class="p-2.5">Kategori</th>
+              <th class="p-2.5 text-right">Modal</th>
+              <th class="p-2.5 text-right">Harga Jual</th>
+              <th class="p-2.5 text-center">Stok</th>
+              <th class="p-2.5 text-center">Aksi</th>
+            </tr>
+          `;
+        }
+        openOwnerPanel();
+      } else {
+        if (btnTrx) btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm';
+        if (btnProd) btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition flex items-center space-x-1.5';
+        
+        if (thead) {
+          thead.innerHTML = `
+            <tr>
+              <th class="p-2.5">No. Nota</th>
+              <th class="p-2.5">Waktu</th>
+              <th class="p-2.5">Kasir</th>
+              <th class="p-2.5">Metode</th>
+              <th class="p-2.5 text-right">Total</th>
+              <th class="p-2.5 text-center">Status</th>
+              <th class="p-2.5 text-center">Aksi</th>
+            </tr>
+          `;
+        }
+        loadTodayTransactionsList();
+      }
+    }
+
+    // MEMUAT RIWAYAT TRANSAKSI DARI GOOGLE APPS SCRIPT
+    async function loadTodayTransactionsList() {
+      showLoading('Mengambil riwayat transaksi hari ini...');
+      try {
+        const pin = appState.currentPin || '1234';
+        const res = await apiGet(`action=getTodayTransactions&pin=${encodeURIComponent(pin)}`);
+        if (res && res.success) {
+          renderTransactionsTable(res.data);
+        } else {
+          showToast(res ? res.message : 'Gagal memuat transaksi', 'error');
+        }
+      } catch (err) {
+        console.error('Error loadTodayTransactionsList:', err);
+        showToast('Gagal memuat riwayat transaksi', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // MENAMPILKAN TABEL TRANSAKSI
+    function renderTransactionsTable(transactions) {
+      const container = document.getElementById('owner-product-table-body');
+      if (!container) return;
+
+      if (!transactions || transactions.length === 0) {
+        container.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400">Belum ada transaksi hari ini</td></tr>';
+        return;
+      }
+
+      container.innerHTML = transactions.map(t => {
+        const isVoid = t.status === 'VOID';
+        return `
+          <tr class="border-b border-slate-100 hover:bg-slate-50 ${isVoid ? 'bg-rose-50/50 opacity-60' : ''}">
+            <td class="p-2.5 font-bold">${t.invoice_no}</td>
+            <td class="p-2.5">${t.timestamp}</td>
+            <td class="p-2.5 font-semibold">${t.cashier_name}</td>
+            <td class="p-2.5">${t.payment_method}</td>
+            <td class="p-2.5 text-right font-bold text-emerald-700">Rp ${Number(t.grand_total).toLocaleString('id-ID')}</td>
+            <td class="p-2.5 text-center">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isVoid ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">${t.status}</span>
+            </td>
+            <td class="p-2.5 text-center">
+              ${!isVoid ? `
+                <button type="button" onclick="confirmVoidTransaction('${t.invoice_no}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-2 py-1 rounded text-[10px] font-bold border border-rose-200">
+                  <i class="fa-solid fa-ban mr-1"></i>Void
+                </button>
+              ` : '<span class="text-[10px] text-slate-400">Dibatalkan</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // KONFIRMASI DAN EKSEKUSI VOID TRANSAKSI
+    async function confirmVoidTransaction(invoiceNo) {
+      if (confirm(`Yakin ingin membatalkan transaksi ${invoiceNo}? Stok barang akan dikembalikan otomatis.`)) {
+        showLoading('Membatalkan transaksi...');
+        try {
+          const pin = appState.currentPin || '1234';
+          const res = await apiPost('voidTransaction', { invoice_no: invoiceNo }, pin);
+          if (res && res.success) {
+            showToast(res.message);
+            loadTodayTransactionsList();
+            loadAppInitialData();
+          } else {
+            showToast(res ? res.message : 'Gagal membatalkan transaksi', 'error');
+          }
+        } catch (e) {
+          showToast('Gagal membatalkan transaksi', 'error');
+        } finally {
+          hideLoading();
+        }
+      }
+    }
   </script>
 </body>
 </html>
