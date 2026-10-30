@@ -2032,31 +2032,7 @@ async function openOwnerPanel() {
       }
     }
 
-   // AMBIL DATA TRANSAKSI DARI GAS
-    async function loadTodayTransactionsList() {
-      showLoading('Mengambil riwayat transaksi...');
-      try {
-        const pin = appState.currentPin || '1234';
-        
-        // Panggil endpoint action getTodayTransactions
-        const res = await apiGet('getTodayTransactions', { pin: appState.currentPin || '1234' });
-        
-        if (res && res.success) {
-          renderTransactionsTable(res.data);
-        } else {
-          showToast(res ? res.message : 'Gagal memuat transaksi', 'error');
-          const tbody = document.getElementById('owner-product-table-body');
-          if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-500 font-bold">${res ? res.message : 'Gagal memuat data'}</td></tr>`;
-        }
-      } catch (err) {
-        console.error('Error loadTodayTransactionsList:', err);
-        showToast('Gagal memuat riwayat transaksi', 'error');
-      } finally {
-        hideLoading();
-      }
-    }
-
-    // MENAMPILKAN TABEL TRANSAKSI
+      // MENAMPILKAN TABEL TRANSAKSI
     function renderTransactionsTable(transactions) {
       const container = document.getElementById('owner-product-table-body');
       if (!container) return;
