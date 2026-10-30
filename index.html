@@ -1388,14 +1388,13 @@ async function switchOwnerTab(tab) {
 async function loadTodayTransactionsList() {
       showLoading('Mengambil riwayat transaksi...');
       try {
+        const pin = (appState && appState.currentPin) || '1234';
         const urlParams = new URLSearchParams(window.location.search);
         const storeId = urlParams.get('store') || (appState && appState.currentStoreId) || 'TOKO-001';
-        const pin = (appState && appState.currentPin) || '1234';
 
-        // Langsung panggil URL backend dengan parameter lengkap persis seperti uji coba browser
-        const endpoint = `${SCRIPT_URL}?action=getTodayTransactions&pin=${encodeURIComponent(pin)}&storeId=${encodeURIComponent(storeId)}`;
-        
-        const response = await fetch(endpoint);
+        // Panggil URL langsung agar parameternya bersih tanpa ter-encode ganda
+        const url = `${SCRIPT_URL}?action=getTodayTransactions&pin=${encodeURIComponent(pin)}&storeId=${encodeURIComponent(storeId)}`;
+        const response = await fetch(url);
         const res = await response.json();
 
         if (res && res.success) {
@@ -1415,7 +1414,6 @@ async function loadTodayTransactionsList() {
         hideLoading();
       }
     }
-
     function renderTransactionsTable(transactions) {
       const container = document.getElementById('owner-product-table-body');
       if (!container) return;
