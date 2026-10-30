@@ -702,25 +702,37 @@
     }
 // Fungsi multi-database pencarian nama & varian barang otomatis
 async function fetchProductMetadataByBarcode(barcode) {
-  const cleanBarcode = String(barcode).trim();
-  if (!cleanBarcode || cleanBarcode.length < 8) return;
+      const cleanBarcode = String(barcode || '').trim();
+      if (!cleanBarcode || cleanBarcode.length < 8) return;
 
-  // 1. Cek database lokal toko terlebih dahulu
-  const existingProduct = appState.products.find(p => String(p.barcode).trim() === cleanBarcode);
-  if (existingProduct) {
-    document.getElementById('pform-name').value = existingProduct.name || '';
-    document.getElementById('pform-category').value = existingProduct.category || '';
-    document.getElementById('pform-variant').value = existingProduct.variant || '';
-    document.getElementById('pform-cost').value = existingProduct.cost_price || 0;
-    document.getElementById('pform-price').value = existingProduct.selling_price || 0;
-    showToast('Data barang ditemukan di database lokal toko!');
-    return;
-  }
+      // 1. Cek database lokal toko
+      const existingProduct = appState.products.find(p => String(p.barcode).trim() === cleanBarcode);
+      if (existingProduct) {
+        document.getElementById('pform-name').value = existingProduct.name || '';
+        document.getElementById('pform-category').value = existingProduct.category || '';
+        document.getElementById('pform-variant').value = existingProduct.variant || '';
+        document.getElementById('pform-cost').value = existingProduct.cost_price || 0;
+        document.getElementById('pform-price').value = existingProduct.selling_price || 0;
+        showToast('Data barang ditemukan di database lokal toko');
+        return;
+      }
 
-  showToast('Mencari data produk di database nasional...');
+      showToast('Mencari data produk otomatis...');
 
-  try {
-    let prod = null;
+      try {
+        const res = await apiGet('lookupBarcode', { barcode: cleanBarcode });
+        if (res.success && res.data) {
+          if (res.data.name) document.getElementById('pform-name').value = res.data.name;
+          if (res.data.variant) document.getElementById('pform-variant').value = res.data.variant;
+          if (res.data.category) document.getElementById('pform-category').value = res.data.category;
+          showToast('Data produk berhasil ditemukan & terisi!');
+        } else {
+          showToast('Barcode baru. Silakan ketik nama produk secara manual.');
+        }
+      } catch (err) {
+        showToast('Gagal memuat katalog online', 'error');
+      }
+    }
 
     // 2. Cek API 1: Open Beauty Facts (Cocok untuk Obat Kumur, Sabun, Sampo, Kosmetik)
     let res = await fetch(`https://world.openbeautyfacts.org/api/v2/product/${cleanBarcode}.json`);
