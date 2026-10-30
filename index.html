@@ -403,7 +403,7 @@
           <div>
             <label class="block font-medium text-slate-700 mb-0.5">Barcode Produk</label>
             <div class="relative flex items-center">
-              <input type="text" id="pform-barcode" placeholder="Scan / ketik barcode" class="w-full pl-2.5 pr-10 py-1.5 border rounded-lg text-xs focus:ring-1 focus:ring-emerald-500">
+              <input type="text" id="pform-barcode" onchange="fetchProductMetadataByBarcode(this.value)" placeholder="Scan / ketik barcode" class="w-full pl-2.5 pr-10 py-1.5 border rounded-lg text-xs focus:ring-1 focus:ring-emerald-500">
               <button type="button" onclick="startScannerForProductForm(event)" title="Scan Barcode via Kamera" class="absolute right-0 top-0 bottom-0 px-2.5 flex items-center justify-center text-emerald-700 active:text-emerald-900 z-10">
                 <i class="fa-solid fa-camera text-base pointer-events-none"></i>
               </button>
@@ -700,54 +700,70 @@
       });
       return await res.json();
     }
-// Fungsi mengambil metadata barang ritel otomatis berdasarkan barcode
+// Fungsi multi-database pencarian nama & varian barang otomatis
 async function fetchProductMetadataByBarcode(barcode) {
-  // 1. Cek apakah sudah ada di database lokal toko
-  const existingProduct = appState.products.find(p => String(p.barcode).trim() === String(barcode).trim());
+  const cleanBarcode = String(barcode).trim();
+  if (!cleanBarcode || cleanBarcode.length < 8) return;
+
+  // 1. Cek database lokal toko terlebih dahulu
+  const existingProduct = appState.products.find(p => String(p.barcode).trim() === cleanBarcode);
   if (existingProduct) {
     document.getElementById('pform-name').value = existingProduct.name || '';
     document.getElementById('pform-category').value = existingProduct.category || '';
     document.getElementById('pform-variant').value = existingProduct.variant || '';
     document.getElementById('pform-cost').value = existingProduct.cost_price || 0;
     document.getElementById('pform-price').value = existingProduct.selling_price || 0;
-    showToast('Data barang ditemukan di database lokal toko');
+    showToast('Data barang ditemukan di database lokal toko!');
     return;
   }
 
-  // 2. Jika barang baru, cari ke Open Food Facts API (gratis & tanpa API key)
-  try {
-    showToast('Mencari data produk otomatis...');
-    const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`);
-    const data = await res.json();
+  showToast('Mencari data produk di database nasional...');
 
+  try {
+    let prod = null;
+
+    // 2. Cek API 1: Open Beauty Facts (Cocok untuk Obat Kumur, Sabun, Sampo, Kosmetik)
+    let res = await fetch(`https://world.openbeautyfacts.org/api/v2/product/${cleanBarcode}.json`);
+    let data = await res.json();
     if (data.status === 1 && data.product) {
-      const prod = data.product;
-      
-      // Ambil nama produk terbaik (bahasa Indonesia atau nama umum)
-      const productName = prod.product_name_id || prod.product_name || prod.generic_name || '';
+      prod = data.product;
+    }
+
+    // 3. Jika belum ketemu, cek API 2: Open Food Facts (Cocok untuk Makanan, Minuman, Sembako)
+    if (!prod) {
+      res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${cleanBarcode}.json`);
+      data = await res.json();
+      if (data.status === 1 && data.product) {
+        prod = data.product;
+      }
+    }
+
+    // 4. Jika produk ditemukan di salah satu database
+    if (prod) {
+      const name = prod.product_name_id || prod.product_name || prod.generic_name || '';
       const brand = prod.brands ? ` ${prod.brands}` : '';
       const quantity = prod.quantity || '';
 
-      if (productName) {
-        document.getElementById('pform-name').value = (productName + brand).trim();
+      if (name) {
+        document.getElementById('pform-name').value = (name + brand).trim();
       }
-      
       if (quantity) {
         document.getElementById('pform-variant').value = quantity;
       }
 
-      // Prediksi kategori sederhana
+      // Prediksi kategori
       if (prod.categories_tags && prod.categories_tags.length > 0) {
         const catTag = prod.categories_tags[0].replace('en:', '').replace(/-/g, ' ');
         document.getElementById('pform-category').value = catTag.charAt(0).toUpperCase() + catTag.slice(1);
       }
 
-      showToast('Data produk berhasil ditemukan & terisi otomatis!');
+      showToast('Data produk berhasil ditemukan & terisi!');
     } else {
-      showToast('Barcode tercatat. Silakan lengkapi nama produk.');
+      showToast('Barcode baru. Silakan ketik nama produk secara manual.');
     }
   } catch (err) {
-    console.warn('Gagal mengambil metadata online:', err);
+    console.warn('Gagal menghubungi server database produk:', err);
+    showToast('Barcode tercatat. Silakan lengkapi manual.');
   }
 }
     async function loadAppInitialData() {
