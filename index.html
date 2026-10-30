@@ -1122,6 +1122,195 @@
         }
       }
 
+      const tempInvoiceNo = 'INV-' + Date.now();
+      const nowStr = new Date().toLocaleString('id-ID');
+
+      const payload = {
+        invoice_no: tempInvoiceNo,
+        timestamp: nowStr,
+        cashier_name: appState.activeShift ? appState.activeShift.cashier_name : 'Kasir',
+        shift_id: appState.activeShift ? appState.activeShift.shift_id : '',
+        total_items: appState.cart.reduce((s, i) => s + i.quantity, 0),
+        subtotal: subtotal,
+        discount: appState.discount,
+        grand_total: grandTotal,
+        payment_method: appState.paymentMethod,
+        cash_received: cashReceived,
+        change: Math.max(0, cashReceived - grandTotal),
+        items: [...appState.cart]
+      };
+
+      // Cek koneksi internet
+      if (!navigator.onLine) {
+        saveOfflineTransaction(payload);
+        return;
+      }
+
+      showLoading('Menyimpan transaksi...');
+      try {
+        const res = await apiPost('saveTransaction', payload);
+        if (res.success) {
+          closeCheckoutModal();
+          showToast('Transaksi Sukses!');
+
+          if (res.data.updatedProducts) {
+            res.data.updatedProducts.forEach(up => {
+              const target = appState.products.find(p => p.id === up.id);
+              if (target) target.stock = up.newStock;
+            });
+          }
+
+          clearCart();
+          renderProductGrid();
+          openReceiptModal(res.data);
+        } else {
+          showToast(res.message, 'error');
+        }
+      } catch (err) {
+        // Fallback jika fetch gagal akibat sinyal hilang di tengah jalan
+        console.warn('Gagal tersambung ke server, menyimpan offline...', err);
+        saveOfflineTransaction(payload);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Penanganan Antrean Offline
+    function saveOfflineTransaction(trxPayload) {
+      const offlineQueue = JSON.parse(localStorage.getItem('kasirku_offline_queue') || '[]');
+      offlineQueue.push(trxPayload);
+      localStorage.setItem('kasirku_offline_queue', JSON.stringify(offlineQueue));
+
+      // Kurangi stok lokal sementara
+      trxPayload.items.forEach(it => {
+        const prod = appState.products.find(p => p.id === it.id);
+        if (prod) prod.stock = Math.max(0, prod.stock - it.quantity);
+      });
+
+      closeCheckoutModal();
+      clearCart();
+      renderProductGrid();
+      showToast('Offline: Transaksi tersimpan di HP!', 'success');
+      openReceiptModal(trxPayload);
+      checkOfflineSyncBadge();
+    }
+
+    // Sinkronisasi data saat internet normal kembali
+    async function syncOfflineTransactions() {
+      const queue = JSON.parse(localStorage.getItem('kasirku_offline_queue') || '[]');
+      if (queue.length === 0) return;
+
+      showLoading(`Menyinkronkan ${queue.length} transaksi offline...`);
+      let successCount = 0;
+
+      for (let i = 0; i < queue.length; i++) {
+        try {
+          const res = await apiPost('saveTransaction', queue[i]);
+          if (res.success) successCount++;
+        } catch (e) {
+          console.error('Gagal sync item:', e);
+        }
+      }
+
+      localStorage.removeItem('kasirku_offline_queue');
+      hideLoading();
+      showToast(`${successCount} transaksi offline berhasil disinkronkan ke Spreadsheet!`);
+      checkOfflineSyncBadge();
+      loadAppInitialData();
+    }
+
+    function checkOfflineSyncBadge() {
+      const queue = JSON.parse(localStorage.getItem('kasirku_offline_queue') || '[]');
+      let badge = document.getElementById('offline-sync-btn');
+      if (!badge) {
+        const header = document.querySelector('header .flex.items-center.space-x-2\\.5');
+        if (header) {
+          badge = document.createElement('button');
+          badge.id = 'offline-sync-btn';
+          badge.type = 'button';
+          badge.onclick = syncOfflineTransactions;
+          badge.className = 'bg-rose-600 hover:bg-rose-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 animate-pulse';
+          badge.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i><span id="offline-sync-count">0 Sync</span>`;
+          header.insertBefore(badge, header.firstChild);
+        }
+      }
+      if (badge) {
+        if (queue.length > 0) {
+          badge.classList.remove('hidden');
+          document.getElementById('offline-sync-count').innerText = `${queue.length} Sync`;
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+    }
+
+    window.addEventListener('online', checkOfflineSyncBadge);
+async function loadTodayTransactionsList() {
+      showLoading('Mengambil riwayat transaksi hari ini...');
+      try {
+        const res = await apiGet('getTodayTransactions', { pin: appState.currentPin });
+        if (res.success) {
+          renderTransactionsTable(res.data);
+        } else {
+          showToast(res.message, 'error');
+        }
+      } catch (err) {
+        showToast('Gagal memuat riwayat transaksi', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function renderTransactionsTable(transactions) {
+      const container = document.getElementById('owner-product-table-body');
+      if (!transactions || transactions.length === 0) {
+        container.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400">Belum ada transaksi hari ini</td></tr>';
+        return;
+      }
+
+      container.innerHTML = transactions.map(t => {
+        const isVoid = t.status === 'VOID';
+        return `
+          <tr class="border-b border-slate-100 hover:bg-slate-50 ${isVoid ? 'bg-rose-50/50 opacity-60' : ''}">
+            <td class="p-2.5 font-bold">${t.invoice_no}</td>
+            <td class="p-2.5">${t.timestamp}</td>
+            <td class="p-2.5 font-semibold">${t.cashier_name}</td>
+            <td class="p-2.5">${t.payment_method}</td>
+            <td class="p-2.5 text-right font-bold text-emerald-700">Rp ${t.grand_total.toLocaleString('id-ID')}</td>
+            <td class="p-2.5 text-center">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isVoid ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">${t.status}</span>
+            </td>
+            <td class="p-2.5 text-center">
+              ${!isVoid ? `
+                <button type="button" onclick="confirmVoidTransaction('${t.invoice_no}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-2 py-1 rounded text-[10px] font-bold border border-rose-200">
+                  <i class="fa-solid fa-ban mr-1"></i>Void
+                </button>
+              ` : '<span class="text-[10px] text-slate-400">Dibatalkan</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function confirmVoidTransaction(invoiceNo) {
+      if (confirm(`Yakin ingin membatalkan transaksi ${invoiceNo}? Stok barang akan dikembalikan otomatis.`)) {
+        showLoading('Membatalkan transaksi...');
+        try {
+          const res = await apiPost('voidTransaction', { invoice_no: invoiceNo }, appState.currentPin);
+          if (res.success) {
+            showToast(res.message);
+            loadTodayTransactionsList();
+            loadAppInitialData();
+          } else {
+            showToast(res.message, 'error');
+          }
+        } catch (e) {
+          showToast('Gagal membatalkan transaksi', 'error');
+        } finally {
+          hideLoading();
+        }
+      }
+    }
       const payload = {
         cashier_name: appState.activeShift ? appState.activeShift.cashier_name : 'Kasir',
         shift_id: appState.activeShift ? appState.activeShift.shift_id : '',
