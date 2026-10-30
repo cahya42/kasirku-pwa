@@ -299,15 +299,15 @@
     </div>
   </div>
 
-  <!-- MODAL BARCODE SCANNER HP -->
-  <div id="scanner-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+  <!-- MODAL BARCODE SCANNER HP (z-[70] agar berada di depan seluruh modal) -->
+  <div id="scanner-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-xs w-full overflow-hidden flex flex-col">
       <div class="p-3 bg-emerald-800 text-white flex justify-between items-center">
         <h3 class="font-bold text-xs"><i class="fa-solid fa-camera mr-1.5"></i>Arahkan ke Barcode</h3>
-        <button onclick="stopBarcodeScanner()" class="text-white hover:text-emerald-200"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" onclick="stopBarcodeScanner()" class="text-white hover:text-emerald-200 p-1"><i class="fa-solid fa-xmark text-sm"></i></button>
       </div>
-      <div class="p-2">
-        <div id="reader" style="width: 100%;"></div>
+      <div class="p-3">
+        <div id="reader" class="w-full overflow-hidden rounded-lg bg-black min-h-[220px]"></div>
       </div>
     </div>
   </div>
@@ -403,9 +403,9 @@
           <div>
             <label class="block font-medium text-slate-700 mb-0.5">Barcode Produk</label>
             <div class="relative flex items-center">
-              <input type="text" id="pform-barcode" placeholder="Scan / ketik barcode" class="w-full pl-2.5 pr-8 py-1.5 border rounded-lg text-xs focus:ring-1 focus:ring-emerald-500">
-              <button type="button" onclick="startScannerForProductForm()" title="Scan Barcode via Kamera" class="absolute right-2 text-emerald-700 hover:text-emerald-900">
-                <i class="fa-solid fa-camera text-sm"></i>
+              <input type="text" id="pform-barcode" placeholder="Scan / ketik barcode" class="w-full pl-2.5 pr-10 py-1.5 border rounded-lg text-xs focus:ring-1 focus:ring-emerald-500">
+              <button type="button" onclick="startScannerForProductForm(event)" title="Scan Barcode via Kamera" class="absolute right-0 top-0 bottom-0 px-2.5 flex items-center justify-center text-emerald-700 active:text-emerald-900 z-10">
+                <i class="fa-solid fa-camera text-base pointer-events-none"></i>
               </button>
             </div>
           </div>
@@ -797,64 +797,80 @@
       }).join('');
     }
 
-    // --- SCAN BARCODE KAMERA HP (KASIR & INPUT PRODUK) ---
-    let scannerTarget = 'pos'; // 'pos' atau 'product_form'
+    // --- SCAN BARCODE KAMERA HP (KASIR & TAMBAH PRODUK) ---
+    let scannerTarget = 'pos';
+    let html5QrCodeScanner = null;
 
-    // Untuk Scanner di Halaman Kasir
     function toggleBarcodeScannerModal() {
       scannerTarget = 'pos';
       launchCameraScanner();
     }
 
-    // Untuk Scanner di Modal Tambah/Edit Produk
-    function startScannerForProductForm() {
+    function startScannerForProductForm(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       scannerTarget = 'product_form';
       launchCameraScanner();
     }
 
-    function launchCameraScanner() {
-      document.getElementById('scanner-modal').classList.remove('hidden');
-      html5QrCodeScanner = new Html5Qrcode("reader");
-      html5QrCodeScanner.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 150 } },
-        (decodedText) => {
-          stopBarcodeScanner();
-          const cleanCode = String(decodedText).trim();
+    async function launchCameraScanner() {
+      const modal = document.getElementById('scanner-modal');
+      modal.classList.remove('hidden');
 
-          if (scannerTarget === 'product_form') {
-            // Isi otomatis input barcode pada form produk
-            document.getElementById('pform-barcode').value = cleanCode;
-            showToast(`Barcode terdeteksi: ${cleanCode}`);
-          } else {
-            // Logika untuk halaman kasir
-            const matched = appState.products.find(p => String(p.barcode).trim() === cleanCode);
-            if (matched) {
-              addToCart(matched.id);
-              showToast(`Ditambahkan: ${matched.name}`);
+      if (!html5QrCodeScanner) {
+        html5QrCodeScanner = new Html5Qrcode("reader");
+      }
+
+      const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 160 },
+        aspectRatio: 1.0
+      };
+
+      try {
+        await html5QrCodeScanner.start(
+          { facingMode: "environment" },
+          config,
+          (decodedText) => {
+            const cleanCode = String(decodedText).trim();
+            stopBarcodeScanner();
+
+            if (scannerTarget === 'product_form') {
+              const barcodeInput = document.getElementById('pform-barcode');
+              if (barcodeInput) barcodeInput.value = cleanCode;
+              showToast(`Barcode terbaca: ${cleanCode}`);
             } else {
-              document.getElementById('search-input').value = cleanCode;
-              renderProductGrid();
-              showToast('Barcode ditemukan di pencarian');
+              const matched = appState.products.find(p => String(p.barcode).trim() === cleanCode);
+              if (matched) {
+                addToCart(matched.id);
+                showToast(`Ditambahkan: ${matched.name}`);
+              } else {
+                document.getElementById('search-input').value = cleanCode;
+                renderProductGrid();
+                showToast('Barcode masuk ke pencarian');
+              }
             }
-          }
-        },
-        (errorMessage) => { /* live scanning frame */ }
-      ).catch(err => {
-        alert('Kamera tidak dapat diakses: ' + err);
+          },
+          (err) => { /* frame scan loop */ }
+        );
+      } catch (err) {
+        showToast('Izin kamera ditolak atau tidak tersedia', 'error');
         stopBarcodeScanner();
-      });
+      }
     }
 
     function stopBarcodeScanner() {
-      if (html5QrCodeScanner) {
+      const modal = document.getElementById('scanner-modal');
+      if (html5QrCodeScanner && html5QrCodeScanner.isScanning) {
         html5QrCodeScanner.stop().then(() => {
-          document.getElementById('scanner-modal').classList.add('hidden');
+          modal.classList.add('hidden');
         }).catch(() => {
-          document.getElementById('scanner-modal').classList.add('hidden');
+          modal.classList.add('hidden');
         });
       } else {
-        document.getElementById('scanner-modal').classList.add('hidden');
+        modal.classList.add('hidden');
       }
     }
     // --- KERANJANG ---
