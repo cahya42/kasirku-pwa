@@ -831,24 +831,28 @@
       ];
 
       if (!html5QrCodeScanner) {
-        html5QrCodeScanner = new Html5Qrcode("reader", { formatsToSupport: formatsSupported });
+        html5QrCodeScanner = new Html5Qrcode("reader", {
+          formatsToSupport: formatsSupported,
+          experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true // Gunakan engine native Android Google Play Services
+          }
+        });
       }
 
       // Konfigurasi area bidik: lebih lebar dan resolusi lebih tajam
       const config = {
         fps: 15,
         qrbox: (viewfinderWidth, viewfinderHeight) => {
-          // Membuat area bidik melebar horizontal (80% lebar layar) cocok untuk barcode panjang
           const width = Math.floor(viewfinderWidth * 0.85);
           const height = Math.floor(width * 0.45);
           return { width: width, height: height };
         },
         videoConstraints: {
-          facingMode: { exact: "environment" },
-          focusMode: "continuous"
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         }
       };
-
       try {
         await html5QrCodeScanner.start(
           { facingMode: "environment" },
