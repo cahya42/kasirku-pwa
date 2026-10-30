@@ -1608,27 +1608,26 @@ _${appState.settings.footer_note || 'Terima kasih atas kunjungan Anda!'}_`;
         ]);
 
         if (prodRes.success) {
-        // Hanya render tabel barang jika tab aktif adalah Daftar Barang
-        if (currentOwnerTab === 'products') {
-          renderOwnerTable(prodRes.data);
-        }
+          if (currentOwnerTab === 'products') {
+            renderOwnerTable(prodRes.data);
+          }
 
-        if (dashRes.success) {
-          document.getElementById('dash-revenue').innerText = 'Rp ' + dashRes.data.todayRevenue.toLocaleString('id-ID');
-          document.getElementById('dash-profit').innerText = 'Rp ' + dashRes.data.todayProfit.toLocaleString('id-ID');
-          document.getElementById('dash-trx-count').innerText = `${dashRes.data.todayTransactionsCount} Transaksi`;
-          document.getElementById('dash-low-stock').innerText = `${dashRes.data.lowStockItems.length} Produk`;
+          if (dashRes.success) {
+            document.getElementById('dash-revenue').innerText = 'Rp ' + dashRes.data.todayRevenue.toLocaleString('id-ID');
+            document.getElementById('dash-profit').innerText = 'Rp ' + dashRes.data.todayProfit.toLocaleString('id-ID');
+            document.getElementById('dash-trx-count').innerText = `${dashRes.data.todayTransactionsCount} Transaksi`;
+            document.getElementById('dash-low-stock').innerText = `${dashRes.data.lowStockItems.length} Produk`;
+          }
+          document.getElementById('owner-panel-modal').classList.remove('hidden');
+        } else {
+          showToast(prodRes.message, 'error');
         }
-        document.getElementById('owner-panel-modal').classList.remove('hidden');
-      } else {
-        showToast(prodRes.message, 'error');
-      
-    } catch (err) {
-      showToast('Gagal memuat panel pemilik', 'error');
-    } finally {
-      hideLoading();
+      } catch (err) {
+        showToast('Gagal memuat panel pemilik', 'error');
+      } finally {
+        hideLoading();
+      }
     }
-  }
         } else {
           showToast(prodRes.message, 'error');
         }
