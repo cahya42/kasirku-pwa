@@ -1288,6 +1288,48 @@ function switchOwnerTab(tab) {
         console.warn('Gagal memuat badge offline:', err);
       }
     }
+    let currentOwnerTab = 'products';
+
+    function switchOwnerTab(tab) {
+      currentOwnerTab = tab;
+      const btnProd = document.getElementById('tab-btn-products');
+      const btnTrx = document.getElementById('tab-btn-trx');
+      const thead = document.getElementById('owner-table-head');
+
+      if (tab === 'products') {
+        btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm';
+        btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition flex items-center space-x-1.5';
+        
+        thead.innerHTML = `
+          <tr>
+            <th class="p-2.5">Barcode / ID</th>
+            <th class="p-2.5">Nama Produk</th>
+            <th class="p-2.5">Kategori</th>
+            <th class="p-2.5 text-right">Modal</th>
+            <th class="p-2.5 text-right">Harga Jual</th>
+            <th class="p-2.5 text-center">Stok</th>
+            <th class="p-2.5 text-center">Aksi</th>
+          </tr>
+        `;
+        openOwnerPanel();
+      } else {
+        btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm';
+        btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition flex items-center space-x-1.5';
+        
+        thead.innerHTML = `
+          <tr>
+            <th class="p-2.5">No. Nota</th>
+            <th class="p-2.5">Waktu</th>
+            <th class="p-2.5">Kasir</th>
+            <th class="p-2.5">Metode</th>
+            <th class="p-2.5 text-right">Total</th>
+            <th class="p-2.5 text-center">Status</th>
+            <th class="p-2.5 text-center">Aksi</th>
+          </tr>
+        `;
+        loadTodayTransactionsList();
+      }
+    }
 async function loadTodayTransactionsList() {
       showLoading('Mengambil riwayat transaksi hari ini...');
       try {
