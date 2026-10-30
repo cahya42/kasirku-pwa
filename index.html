@@ -13,9 +13,10 @@
   <meta name="apple-mobile-web-app-title" content="KasirKu Pro">
   <meta name="theme-color" content="#064e3b">
 
-  <!-- Tailwind & FontAwesome -->
+  <!-- Tailwind, FontAwesome & Barcode Scanner HTML5 -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   
   <style>
     @media print {
@@ -77,13 +78,17 @@
 
   <!-- MAIN WRAPPER -->
   <main class="flex-1 flex overflow-hidden">
-    <!-- PANEL KATALOG (100% di HP, 65% di Laptop) -->
+    <!-- PANEL KATALOG -->
     <section class="w-full lg:w-8/12 flex flex-col border-r border-slate-200 bg-slate-50">
       <div class="p-3 bg-white border-b border-slate-200 flex-shrink-0 space-y-2.5">
         <div class="flex items-center space-x-2">
           <div class="relative flex-1">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-            <input type="text" id="search-input" oninput="renderProductGrid()" placeholder="Cari nama barang atau barcode..." class="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+            <input type="text" id="search-input" oninput="renderProductGrid()" placeholder="Cari nama barang atau barcode..." class="w-full pl-8 pr-10 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+            <!-- Tombol Scan Barcode Kamera -->
+            <button onclick="toggleBarcodeScannerModal()" title="Scan Barcode via Kamera HP" class="absolute right-2.5 top-1.5 text-emerald-700 hover:text-emerald-900 px-1">
+              <i class="fa-solid fa-barcode text-base"></i>
+            </button>
           </div>
           <button onclick="clearSearch()" class="px-2.5 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600">
             Reset
@@ -101,7 +106,7 @@
       </div>
     </section>
 
-    <!-- PANEL KERANJANG DESKTOP (35%) -->
+    <!-- PANEL KERANJANG DESKTOP -->
     <section class="hidden lg:flex lg:w-4/12 flex-col bg-white shadow-xl z-10">
       <div class="p-3 border-b border-slate-200 flex justify-between items-center bg-slate-50">
         <div class="flex items-center space-x-2">
@@ -140,7 +145,7 @@
     </section>
   </main>
 
-  <!-- FLOATING BOTTOM BAR KHUSUS HP -->
+  <!-- FLOATING BOTTOM BAR HP -->
   <div id="mobile-cart-bar" onclick="toggleMobileCartDrawer()" class="lg:hidden fixed bottom-3 left-3 right-3 bg-emerald-800 text-white rounded-2xl shadow-2xl p-3 flex items-center justify-between z-30 cursor-pointer border border-emerald-600 transition-transform duration-300 translate-y-28">
     <div class="flex items-center space-x-3">
       <div class="relative">
@@ -160,7 +165,7 @@
     </div>
   </div>
 
-  <!-- BOTTOM DRAWER KERANJANG HP -->
+  <!-- BOTTOM DRAWER HP -->
   <div id="mobile-cart-drawer" class="lg:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 flex flex-col justify-end hidden">
     <div class="bg-white rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
       <div class="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
@@ -245,13 +250,13 @@
 
         <button onclick="submitTransaction()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow text-xs flex items-center justify-center space-x-1.5">
           <i class="fa-solid fa-check"></i>
-          <span>Selesaikan Transaksi & Cetak</span>
+          <span>Selesaikan Transaksi</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- STRUK MODAL -->
+  <!-- STRUK MODAL (CETAK & WHATSAPP) -->
   <div id="receipt-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-xs w-full overflow-hidden flex flex-col max-h-[90vh]">
       <div class="p-2.5 bg-slate-800 text-white flex justify-between items-center no-print">
@@ -282,10 +287,27 @@
           <p id="rcpt-footer-note">Terima kasih atas kunjungan Anda!</p>
         </div>
       </div>
+      <!-- Tombol Cetak & Kirim WA -->
       <div class="p-2.5 bg-slate-100 border-t border-slate-200 flex gap-2 no-print">
         <button onclick="window.print()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 rounded-lg text-xs flex items-center justify-center space-x-1">
-          <i class="fa-solid fa-print"></i><span>Cetak Struk</span>
+          <i class="fa-solid fa-print"></i><span>Cetak</span>
         </button>
+        <button onclick="sendReceiptToWhatsApp()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 rounded-lg text-xs flex items-center justify-center space-x-1">
+          <i class="fa-brands fa-whatsapp text-sm"></i><span>Kirim WA</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL BARCODE SCANNER HP -->
+  <div id="scanner-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-xs w-full overflow-hidden flex flex-col">
+      <div class="p-3 bg-emerald-800 text-white flex justify-between items-center">
+        <h3 class="font-bold text-xs"><i class="fa-solid fa-camera mr-1.5"></i>Arahkan ke Barcode</h3>
+        <button onclick="stopBarcodeScanner()" class="text-white hover:text-emerald-200"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-2">
+        <div id="reader" style="width: 100%;"></div>
       </div>
     </div>
   </div>
@@ -306,13 +328,13 @@
     </div>
   </div>
 
-  <!-- OWNER PANEL MODAL -->
+  <!-- OWNER PANEL MODAL (DASHBOARD OMZET & LABA) -->
   <div id="owner-panel-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3 md:p-6">
     <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full h-[90vh] flex flex-col overflow-hidden">
       <div class="px-5 py-3.5 bg-slate-900 text-white flex justify-between items-center flex-shrink-0">
         <div class="flex items-center space-x-2.5">
-          <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
-          <h2 class="font-bold text-sm">Kelola Produk & Inventaris</h2>
+          <i class="fa-solid fa-chart-pie text-amber-400"></i>
+          <h2 class="font-bold text-sm">Panel Pemilik & Inventaris</h2>
         </div>
         <div class="flex items-center space-x-2">
           <button onclick="openCashierManagerModal()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1">
@@ -327,12 +349,33 @@
           <button onclick="closeOwnerPanel()" class="text-slate-400 hover:text-white px-1.5"><i class="fa-solid fa-xmark text-base"></i></button>
         </div>
       </div>
-      <div class="flex-1 overflow-y-auto p-3 custom-scrollbar bg-slate-50">
+
+      <div class="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50 space-y-3">
+        <!-- KARTU RINGKASAN OMZET & LABA -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+          <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-[10px] text-slate-500 font-bold uppercase">Omzet Hari Ini</p>
+            <h3 id="dash-revenue" class="text-sm md:text-base font-extrabold text-emerald-700">Rp 0</h3>
+            <span id="dash-trx-count" class="text-[9px] text-slate-400">0 Transaksi</span>
+          </div>
+          <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-[10px] text-slate-500 font-bold uppercase">Estimasi Laba Hari Ini</p>
+            <h3 id="dash-profit" class="text-sm md:text-base font-extrabold text-blue-700">Rp 0</h3>
+            <span class="text-[9px] text-slate-400">Selisih Jual - Modal</span>
+          </div>
+          <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm col-span-2 md:col-span-1">
+            <p class="text-[10px] text-slate-500 font-bold uppercase">Stok Menipis / Kritis</p>
+            <h3 id="dash-low-stock" class="text-sm md:text-base font-extrabold text-rose-600">0 Produk</h3>
+            <span class="text-[9px] text-slate-400">Perlu Segera Kulakan</span>
+          </div>
+        </div>
+
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <table class="w-full text-left border-collapse text-xs">
             <thead class="bg-slate-100 text-slate-600 uppercase font-bold text-[10px] border-b border-slate-200">
               <tr>
-                <th class="p-2.5">ID / Nama Barang</th>
+                <th class="p-2.5">Barcode / ID</th>
+                <th class="p-2.5">Nama Produk</th>
                 <th class="p-2.5">Kategori</th>
                 <th class="p-2.5 text-right">Modal</th>
                 <th class="p-2.5 text-right">Harga Jual</th>
@@ -347,7 +390,7 @@
     </div>
   </div>
 
-  <!-- FORM PRODUK (DENGAN UPLOAD FOTO LANGSUNG) -->
+  <!-- FORM PRODUK -->
   <div id="product-form-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden flex flex-col">
       <div class="px-4 py-3 bg-slate-800 text-white flex justify-between items-center">
@@ -356,19 +399,23 @@
       </div>
       <form id="product-form" onsubmit="handleProductSubmit(event)" class="p-4 space-y-2.5 text-xs overflow-y-auto max-h-[75vh] custom-scrollbar">
         <input type="hidden" id="pform-id">
-        <div>
-          <label class="block font-medium text-slate-700 mb-0.5">Nama Produk *</label>
-          <input type="text" id="pform-name" required class="w-full px-2.5 py-1.5 border rounded-lg focus:ring-1 focus:ring-emerald-500">
-        </div>
         <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-medium text-slate-700 mb-0.5">Barcode Produk</label>
+            <input type="text" id="pform-barcode" placeholder="Scan atau ketik" class="w-full px-2.5 py-1.5 border rounded-lg">
+          </div>
           <div>
             <label class="block font-medium text-slate-700 mb-0.5">Kategori *</label>
             <input type="text" id="pform-category" required class="w-full px-2.5 py-1.5 border rounded-lg">
           </div>
-          <div>
-            <label class="block font-medium text-slate-700 mb-0.5">Varian/Satuan</label>
-            <input type="text" id="pform-variant" placeholder="500ml / Bungkus" class="w-full px-2.5 py-1.5 border rounded-lg">
-          </div>
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-0.5">Nama Produk *</label>
+          <input type="text" id="pform-name" required class="w-full px-2.5 py-1.5 border rounded-lg focus:ring-1 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-0.5">Varian/Satuan</label>
+          <input type="text" id="pform-variant" placeholder="500ml / Bungkus" class="w-full px-2.5 py-1.5 border rounded-lg">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
@@ -391,7 +438,6 @@
           </div>
         </div>
         
-        <!-- Upload Foto Produk -->
         <div>
           <label class="block font-medium text-slate-700 mb-0.5">Foto Produk (Dari Galeri / Kamera HP)</label>
           <div class="flex items-center space-x-2">
@@ -413,7 +459,7 @@
     </div>
   </div>
 
-  <!-- MODAL PROFIL TOKO (DENGAN UPLOAD FOTO & QRIS) -->
+  <!-- MODAL PROFIL TOKO -->
   <div id="store-settings-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden flex flex-col">
       <div class="px-4 py-3 bg-emerald-800 text-white flex justify-between items-center">
@@ -438,7 +484,6 @@
           <input type="text" id="set-store-phone" placeholder="0812-xxxx" class="w-full px-2.5 py-1.5 border rounded-lg">
         </div>
         
-        <!-- Upload Langsung Logo Toko -->
         <div>
           <label class="block font-medium text-slate-700 mb-0.5">Logo Toko (Upload dari Kamera/HP)</label>
           <div class="flex items-center space-x-2">
@@ -452,7 +497,6 @@
           <input type="hidden" id="base64-set-logo">
         </div>
 
-        <!-- Upload Langsung Gambar QRIS -->
         <div>
           <label class="block font-medium text-slate-700 mb-0.5">Gambar QRIS Toko (Upload dari Galeri/HP)</label>
           <div class="flex items-center space-x-2">
@@ -529,7 +573,7 @@
     <p id="loading-text" class="text-white text-xs font-bold">Memproses...</p>
   </div>
 
-  <!-- ==================== LOGIKA JAVASCRIPT HYBRID & UPLOAD ==================== -->
+  <!-- ==================== LOGIKA JAVASCRIPT LENGKAP ==================== -->
   <script>
     // --- GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA ---
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyMc-XIGQ6IBQJ83864Pu_SFRPNXBCWkn_auBweH-5dz1oG9bOSFXvLd4qWiN1kLzD/exec';
@@ -556,6 +600,9 @@
       discount: 0,
       paymentMethod: 'Cash'
     };
+
+    let lastReceiptData = null; // Menyimpan data transaksi untuk kirim WhatsApp
+    let html5QrCodeScanner = null; // Scanner Barcode HP
 
     document.addEventListener('DOMContentLoaded', () => {
       startClock();
@@ -587,7 +634,7 @@
       setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3000);
     }
 
-    // --- LOGIKA UPLOAD & KOMPRESI BASE64 FOTO HP ---
+    // --- UPLOAD & KOMPRESI BASE64 FOTO HP ---
     function previewUpload(inputElement, previewImgId, labelTextId) {
       const file = inputElement.files[0];
       if (!file) return;
@@ -599,7 +646,7 @@
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement('canvas');
-          const maxDim = 800; // Kompresi max lebar 800px agar cepat diupload
+          const maxDim = 800;
           let width = img.width;
           let height = img.height;
 
@@ -745,6 +792,45 @@
       }).join('');
     }
 
+    // --- SCAN BARCODE KAMERA HP ---
+    function toggleBarcodeScannerModal() {
+      document.getElementById('scanner-modal').classList.remove('hidden');
+      html5QrCodeScanner = new Html5Qrcode("reader");
+      html5QrCodeScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 150 } },
+        (decodedText) => {
+          stopBarcodeScanner();
+          const cleanCode = String(decodedText).trim();
+          const matched = appState.products.find(p => String(p.barcode).trim() === cleanCode);
+          if (matched) {
+            addToCart(matched.id);
+            showToast(`Ditambahkan: ${matched.name}`);
+          } else {
+            document.getElementById('search-input').value = cleanCode;
+            renderProductGrid();
+            showToast('Barcode ditemukan di pencarian');
+          }
+        },
+        (errorMessage) => { /* live scanning frame */ }
+      ).catch(err => {
+        alert('Kamera tidak dapat diakses: ' + err);
+        stopBarcodeScanner();
+      });
+    }
+
+    function stopBarcodeScanner() {
+      if (html5QrCodeScanner) {
+        html5QrCodeScanner.stop().then(() => {
+          document.getElementById('scanner-modal').classList.add('hidden');
+        }).catch(() => {
+          document.getElementById('scanner-modal').classList.add('hidden');
+        });
+      } else {
+        document.getElementById('scanner-modal').classList.add('hidden');
+      }
+    }
+
     // --- KERANJANG ---
     function addToCart(productId) {
       const prod = appState.products.find(p => p.id === productId);
@@ -774,7 +860,7 @@
         removeFromCart(productId);
       } else {
         if (newQty > item.maxStock) {
-          showToast('Melebihi batas stok barang', 'error');
+          showToast('Melebihi stok barang', 'error');
           return;
         }
         item.quantity = newQty;
@@ -989,8 +1075,10 @@
       }
     }
 
-    // --- STRUK THERMAL ---
+    // --- STRUK THERMAL & FITUR WHATSAPP ---
     function openReceiptModal(data) {
+      lastReceiptData = data;
+
       document.getElementById('rcpt-store-name').innerText = appState.settings.store_name || 'KasirKu Pro';
       document.getElementById('rcpt-store-address').innerText = appState.settings.store_address || '';
       document.getElementById('rcpt-store-phone').innerText = appState.settings.store_phone || '';
@@ -1021,7 +1109,42 @@
       document.getElementById('receipt-modal').classList.add('hidden');
     }
 
-    // --- OWNER PANEL & PIN ---
+    function sendReceiptToWhatsApp() {
+      if (!lastReceiptData) return;
+      const phone = prompt('Nomor WhatsApp pembeli (contoh: 08123456789):');
+      if (!phone) return;
+
+      let formattedPhone = phone.trim().replace(/[^0-9]/g, '');
+      if (formattedPhone.startsWith('0')) formattedPhone = '62' + formattedPhone.slice(1);
+
+      let itemListText = '';
+      lastReceiptData.items.forEach(item => {
+        itemListText += `• ${item.name} x${item.quantity} = Rp ${(item.price * item.quantity).toLocaleString('id-ID')}\n`;
+      });
+
+      const message = 
+`*STRUK PEMBELIAN - ${appState.settings.store_name || 'KasirKu Pro'}*
+${appState.settings.store_address || ''}
+----------------------------------------
+No. Nota : ${lastReceiptData.invoice_no}
+Waktu    : ${lastReceiptData.timestamp}
+Kasir    : ${lastReceiptData.cashier_name}
+Metode   : ${lastReceiptData.payment_method}
+----------------------------------------
+${itemListText}----------------------------------------
+Subtotal : Rp ${lastReceiptData.subtotal.toLocaleString('id-ID')}
+Diskon   : Rp ${lastReceiptData.discount.toLocaleString('id-ID')}
+*TOTAL    : Rp ${lastReceiptData.grand_total.toLocaleString('id-ID')}*
+Bayar    : Rp ${lastReceiptData.cash_received.toLocaleString('id-ID')}
+Kembali  : Rp ${lastReceiptData.change.toLocaleString('id-ID')}
+----------------------------------------
+_${appState.settings.footer_note || 'Terima kasih atas kunjungan Anda!'}_`;
+
+      const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+      window.open(waUrl, '_blank');
+    }
+
+    // --- OWNER PANEL & DASHBOARD LABA ---
     function requestAdminAccess() {
       document.getElementById('input-admin-pin').value = '';
       document.getElementById('pin-modal').classList.remove('hidden');
@@ -1052,17 +1175,27 @@
     }
 
     async function openOwnerPanel() {
-      showLoading('Mengambil inventaris...');
+      showLoading('Mengambil inventaris & dashboard...');
       try {
-        const res = await apiGet('getAllProducts', { pin: appState.currentPin });
-        if (res.success) {
-          renderOwnerTable(res.data);
+        const [prodRes, dashRes] = await Promise.all([
+          apiGet('getAllProducts', { pin: appState.currentPin }),
+          apiGet('getDashboardSummary', { pin: appState.currentPin })
+        ]);
+
+        if (prodRes.success) {
+          renderOwnerTable(prodRes.data);
+          if (dashRes.success) {
+            document.getElementById('dash-revenue').innerText = 'Rp ' + dashRes.data.todayRevenue.toLocaleString('id-ID');
+            document.getElementById('dash-profit').innerText = 'Rp ' + dashRes.data.todayProfit.toLocaleString('id-ID');
+            document.getElementById('dash-trx-count').innerText = `${dashRes.data.todayTransactionsCount} Transaksi`;
+            document.getElementById('dash-low-stock').innerText = `${dashRes.data.lowStockItems.length} Produk`;
+          }
           document.getElementById('owner-panel-modal').classList.remove('hidden');
         } else {
-          showToast(res.message, 'error');
+          showToast(prodRes.message, 'error');
         }
       } catch (err) {
-        showToast('Gagal memuat barang', 'error');
+        showToast('Gagal memuat panel pemilik', 'error');
       } finally {
         hideLoading();
       }
@@ -1075,12 +1208,13 @@
     function renderOwnerTable(items) {
       document.getElementById('owner-product-table-body').innerHTML = items.map(p => `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
-          <td class="p-2 font-bold">${p.name} <span class="text-[10px] text-slate-400 font-normal">(${p.id})</span></td>
-          <td class="p-2">${p.category}</td>
-          <td class="p-2 text-right">Rp ${p.cost_price.toLocaleString('id-ID')}</td>
-          <td class="p-2 text-right font-bold text-emerald-700">Rp ${p.selling_price.toLocaleString('id-ID')}</td>
-          <td class="p-2 text-center font-bold">${p.stock}</td>
-          <td class="p-2 text-center">
+          <td class="p-2.5 font-bold">${p.barcode || p.id}</td>
+          <td class="p-2.5 font-semibold">${p.name}</td>
+          <td class="p-2.5">${p.category}</td>
+          <td class="p-2.5 text-right">Rp ${p.cost_price.toLocaleString('id-ID')}</td>
+          <td class="p-2.5 text-right font-bold text-emerald-700">Rp ${p.selling_price.toLocaleString('id-ID')}</td>
+          <td class="p-2.5 text-center font-bold ${p.stock <= p.min_stock ? 'text-rose-600' : ''}">${p.stock}</td>
+          <td class="p-2.5 text-center">
             <button onclick='openEditProductModal(${JSON.stringify(p)})' class="text-blue-600 p-1"><i class="fa-solid fa-pen"></i></button>
             <button onclick="confirmDeleteProduct('${p.id}')" class="text-rose-600 p-1"><i class="fa-solid fa-trash"></i></button>
           </td>
@@ -1088,10 +1222,11 @@
       `).join('');
     }
 
-    // --- FORM PRODUK & UPLOAD FOTO BARANG ---
+    // --- FORM PRODUK & FOTO ---
     function openProductFormModal(mode) {
       document.getElementById('product-form').reset();
       document.getElementById('pform-id').value = '';
+      document.getElementById('pform-barcode').value = '';
       document.getElementById('base64-pform-img').value = '';
       document.getElementById('img-preview-pform').classList.add('hidden');
       document.getElementById('label-pform-img').innerText = 'Pilih Foto Produk';
@@ -1102,6 +1237,7 @@
     function openEditProductModal(p) {
       openProductFormModal('edit');
       document.getElementById('pform-id').value = p.id;
+      document.getElementById('pform-barcode').value = p.barcode || '';
       document.getElementById('pform-name').value = p.name;
       document.getElementById('pform-category').value = p.category;
       document.getElementById('pform-variant').value = p.variant || '';
@@ -1124,6 +1260,7 @@
       showLoading('Mengunggah & menyimpan produk...');
       const payload = {
         id: document.getElementById('pform-id').value,
+        barcode: document.getElementById('pform-barcode').value.trim(),
         name: document.getElementById('pform-name').value.trim(),
         category: document.getElementById('pform-category').value.trim(),
         variant: document.getElementById('pform-variant').value.trim(),
@@ -1170,7 +1307,7 @@
       }
     }
 
-    // --- PROFIL TOKO (DENGAN FOTO & QRIS HP) ---
+    // --- PROFIL TOKO MANDIRI ---
     function openStoreSettingsModal() {
       document.getElementById('set-store-name').value = appState.settings.store_name || '';
       document.getElementById('set-store-address').value = appState.settings.store_address || '';
@@ -1243,7 +1380,7 @@
       }
     }
 
-    // --- KELOLA KASIR MANDIRI ---
+    // --- KELOLA KASIR TOKO ---
     function openCashierManagerModal() {
       renderCashierList();
       document.getElementById('input-new-cashier').value = '';
