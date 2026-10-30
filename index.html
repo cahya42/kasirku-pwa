@@ -1365,16 +1365,15 @@ currentOwnerTab = 'products';
 async function loadTodayTransactionsList() {
       showLoading('Mengambil riwayat transaksi...');
       try {
-        // Ambil storeId dari URL atau appState
         const urlParams = new URLSearchParams(window.location.search);
         const storeId = urlParams.get('store') || (appState && appState.currentStoreId) || 'TOKO-001';
         const pin = (appState && appState.currentPin) || '1234';
 
-        // Kirim action bersama pin dan storeId
-        const res = await apiGet('getTodayTransactions', { 
-          pin: pin, 
-          storeId: storeId 
-        });
+        // Langsung panggil URL backend dengan parameter lengkap persis seperti uji coba browser
+        const endpoint = `${SCRIPT_URL}?action=getTodayTransactions&pin=${encodeURIComponent(pin)}&storeId=${encodeURIComponent(storeId)}`;
+        
+        const response = await fetch(endpoint);
+        const res = await response.json();
 
         if (res && res.success) {
           renderTransactionsTable(res.data);
