@@ -820,14 +820,33 @@
       const modal = document.getElementById('scanner-modal');
       modal.classList.remove('hidden');
 
+      // Tentukan format barcode produk ritel standar agar angka tidak salah tebak
+      const formatsSupported = [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.QR_CODE
+      ];
+
       if (!html5QrCodeScanner) {
-        html5QrCodeScanner = new Html5Qrcode("reader");
+        html5QrCodeScanner = new Html5Qrcode("reader", { formatsToSupport: formatsSupported });
       }
 
+      // Konfigurasi area bidik: lebih lebar dan resolusi lebih tajam
       const config = {
-        fps: 10,
-        qrbox: { width: 250, height: 160 },
-        aspectRatio: 1.0
+        fps: 15,
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+          // Membuat area bidik melebar horizontal (80% lebar layar) cocok untuk barcode panjang
+          const width = Math.floor(viewfinderWidth * 0.85);
+          const height = Math.floor(width * 0.45);
+          return { width: width, height: height };
+        },
+        videoConstraints: {
+          facingMode: { exact: "environment" },
+          focusMode: "continuous"
+        }
       };
 
       try {
@@ -854,11 +873,39 @@
               }
             }
           },
-          (err) => { /* frame loop */ }
+          (err) => { /* live loop */ }
         );
       } catch (err) {
-        showToast('Izin kamera ditolak atau tidak tersedia', 'error');
-        stopBarcodeScanner();
+        // Fallback jika kamera belakang tidak mendukung constraint lanjutan
+        try {
+          await html5QrCodeScanner.start(
+            { facingMode: "environment" },
+            { fps: 15, qrbox: { width: 260, height: 130 } },
+            (decodedText) => {
+              const cleanCode = String(decodedText).trim();
+              stopBarcodeScanner();
+              if (scannerTarget === 'product_form') {
+                const barcodeInput = document.getElementById('pform-barcode');
+                if (barcodeInput) barcodeInput.value = cleanCode;
+                showToast(`Barcode terbaca: ${cleanCode}`);
+              } else {
+                const matched = appState.products.find(p => String(p.barcode).trim() === cleanCode);
+                if (matched) {
+                  addToCart(matched.id);
+                  showToast(`Ditambahkan: ${matched.name}`);
+                } else {
+                  document.getElementById('search-input').value = cleanCode;
+                  renderProductGrid();
+                  showToast('Barcode masuk ke pencarian');
+                }
+              }
+            },
+            () => {}
+          );
+        } catch (fallbackErr) {
+          showToast('Izin kamera ditolak atau tidak tersedia', 'error');
+          stopBarcodeScanner();
+        }
       }
     }
 
