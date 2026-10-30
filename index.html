@@ -1363,15 +1363,22 @@ currentOwnerTab = 'products';
       }
     }
 async function loadTodayTransactionsList() {
-      showLoading('Mengambil riwayat transaksi hari ini...');
+      showLoading('Mengambil riwayat transaksi...');
       try {
-        const res = await apiGet('getTodayTransactions', { pin: appState.currentPin });
-        if (res.success) {
+        const pin = appState.currentPin || '1234';
+        const res = await apiGet('getTodayTransactions', { pin: pin });
+        
+        if (res && res.success) {
           renderTransactionsTable(res.data);
         } else {
-          showToast(res.message, 'error');
+          showToast(res ? res.message : 'Gagal memuat transaksi', 'error');
+          const tbody = document.getElementById('owner-product-table-body');
+          if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-rose-500 font-bold">${res ? res.message : 'Gagal memuat data'}</td></tr>`;
+          }
         }
       } catch (err) {
+        console.error('Error loadTodayTransactionsList:', err);
         showToast('Gagal memuat riwayat transaksi', 'error');
       } finally {
         hideLoading();
