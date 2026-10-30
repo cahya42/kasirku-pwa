@@ -1318,7 +1318,44 @@ async function loadTodayTransactionsList() {
         }
       }
     }
-    showLoading('Menyimpan transaksi...');
+
+    async function submitTransaction() {
+      const subtotal = appState.cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+      const grandTotal = Math.max(0, subtotal - appState.discount);
+      let cashReceived = grandTotal;
+
+      if (appState.paymentMethod === 'Cash') {
+        cashReceived = Number(document.getElementById('cash-received-input').value) || 0;
+        if (cashReceived < grandTotal) {
+          showToast('Uang diterima kurang dari total tagihan!', 'error');
+          return;
+        }
+      }
+
+      const tempInvoiceNo = 'INV-' + Date.now();
+      const nowStr = new Date().toLocaleString('id-ID');
+
+      const payload = {
+        invoice_no: tempInvoiceNo,
+        timestamp: nowStr,
+        cashier_name: appState.activeShift ? appState.activeShift.cashier_name : 'Kasir',
+        shift_id: appState.activeShift ? appState.activeShift.shift_id : '',
+        total_items: appState.cart.reduce((s, i) => s + i.quantity, 0),
+        subtotal: subtotal,
+        discount: appState.discount,
+        grand_total: grandTotal,
+        payment_method: appState.paymentMethod,
+        cash_received: cashReceived,
+        change: Math.max(0, cashReceived - grandTotal),
+        items: [...appState.cart]
+      };
+
+      if (!navigator.onLine) {
+        saveOfflineTransaction(payload);
+        return;
+      }
+
+      showLoading('Menyimpan transaksi...');
       try {
         const res = await apiPost('saveTransaction', payload);
         if (res.success) {
@@ -1339,7 +1376,8 @@ async function loadTodayTransactionsList() {
           showToast(res.message, 'error');
         }
       } catch (err) {
-        showToast('Gagal transaksi: ' + err.message, 'error');
+        console.warn('Gagal tersambung ke server, menyimpan offline...', err);
+        saveOfflineTransaction(payload);
       } finally {
         hideLoading();
       }
