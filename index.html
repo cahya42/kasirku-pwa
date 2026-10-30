@@ -700,7 +700,56 @@
       });
       return await res.json();
     }
+// Fungsi mengambil metadata barang ritel otomatis berdasarkan barcode
+async function fetchProductMetadataByBarcode(barcode) {
+  // 1. Cek apakah sudah ada di database lokal toko
+  const existingProduct = appState.products.find(p => String(p.barcode).trim() === String(barcode).trim());
+  if (existingProduct) {
+    document.getElementById('pform-name').value = existingProduct.name || '';
+    document.getElementById('pform-category').value = existingProduct.category || '';
+    document.getElementById('pform-variant').value = existingProduct.variant || '';
+    document.getElementById('pform-cost').value = existingProduct.cost_price || 0;
+    document.getElementById('pform-price').value = existingProduct.selling_price || 0;
+    showToast('Data barang ditemukan di database lokal toko');
+    return;
+  }
 
+  // 2. Jika barang baru, cari ke Open Food Facts API (gratis & tanpa API key)
+  try {
+    showToast('Mencari data produk otomatis...');
+    const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`);
+    const data = await res.json();
+
+    if (data.status === 1 && data.product) {
+      const prod = data.product;
+      
+      // Ambil nama produk terbaik (bahasa Indonesia atau nama umum)
+      const productName = prod.product_name_id || prod.product_name || prod.generic_name || '';
+      const brand = prod.brands ? ` ${prod.brands}` : '';
+      const quantity = prod.quantity || '';
+
+      if (productName) {
+        document.getElementById('pform-name').value = (productName + brand).trim();
+      }
+      
+      if (quantity) {
+        document.getElementById('pform-variant').value = quantity;
+      }
+
+      // Prediksi kategori sederhana
+      if (prod.categories_tags && prod.categories_tags.length > 0) {
+        const catTag = prod.categories_tags[0].replace('en:', '').replace(/-/g, ' ');
+        document.getElementById('pform-category').value = catTag.charAt(0).toUpperCase() + catTag.slice(1);
+      }
+
+      showToast('Data produk berhasil ditemukan & terisi otomatis!');
+    } else {
+      showToast('Barcode tercatat. Silakan lengkapi nama produk.');
+    }
+  } catch (err) {
+    console.warn('Gagal mengambil metadata online:', err);
+  }
+}
     async function loadAppInitialData() {
       showLoading('Mengambil data toko...');
       try {
@@ -865,6 +914,10 @@
               const barcodeInput = document.getElementById('pform-barcode');
               if (barcodeInput) barcodeInput.value = cleanCode;
               showToast(`Barcode terbaca: ${cleanCode}`);
+
+              // Panggil otomatis pencarian nama & varian barang
+              fetchProductMetadataByBarcode(cleanCode);
+            
             } else {
               const matched = appState.products.find(p => String(p.barcode).trim() === cleanCode);
               if (matched) {
