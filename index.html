@@ -1366,9 +1366,10 @@ async function loadTodayTransactionsList() {
       showLoading('Mengambil riwayat transaksi...');
       try {
         const pin = appState.currentPin || '1234';
+        const currentStore = appState.currentStoreId || new URLSearchParams(window.location.search).get('store') || 'TOKO-001';
         
-        // PENTING: Gunakan dua argumen seperti baris getAllProducts
-        const res = await apiGet('getTodayTransactions', { pin: pin });
+        // Mengirim storeId agar dikenali backend
+        const res = await apiGet('getTodayTransactions', { pin: pin, storeId: currentStore });
         
         if (res && res.success) {
           renderTransactionsTable(res.data);
