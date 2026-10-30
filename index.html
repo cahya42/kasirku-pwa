@@ -610,6 +610,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       startClock();
       loadAppInitialData();
+      checkOfflineSyncBadge(); // Panggil di sini, jangan di luar
     });
 
     function startClock() {
