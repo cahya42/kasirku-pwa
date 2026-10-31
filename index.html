@@ -2098,17 +2098,17 @@ async function openOwnerPanel() {
       }
     }
     // FUNGSI GANTI TAB PANEL PEMILIK
-    function switchOwnerTab(tab) {
+function switchOwnerTab(tab) {
       currentOwnerTab = tab;
       const btnProd = document.getElementById('tab-btn-products');
-      const btnTrx = document.getElementById('tab-btn-trx');
+      const btnTrx = document.getElementById('tab-btn-trx') || document.getElementById('tab-btn-transactions');
       const thead = document.getElementById('owner-table-head');
+      const searchBox = document.getElementById('trx-search-container');
 
       if (tab === 'products') {
-        if (tab === 'products') {
-        const searchBox = document.getElementById('trx-search-container');
+        // Sembunyikan pencarian transaksi saat tab produk aktif
         if (searchBox) searchBox.classList.add('hidden');
-        // ... sisa kode switchOwnerTab produk Anda
+
         if (btnProd) btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm';
         if (btnTrx) btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition flex items-center space-x-1.5';
         
@@ -2127,6 +2127,9 @@ async function openOwnerPanel() {
         }
         openOwnerPanel();
       } else {
+        // Tampilkan kotak pencarian saat tab transaksi aktif
+        if (searchBox) searchBox.classList.remove('hidden');
+
         if (btnTrx) btnTrx.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition flex items-center space-x-1.5 shadow-sm';
         if (btnProd) btnProd.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition flex items-center space-x-1.5';
         
