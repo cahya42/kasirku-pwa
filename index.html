@@ -2140,6 +2140,7 @@ async function openOwnerPanel() {
         `;
       }).join('');
     }
+
     // KONFIRMASI DAN EKSEKUSI VOID TRANSAKSI
     async function confirmVoidTransaction(invoiceNo) {
       if (confirm(`Yakin ingin membatalkan transaksi ${invoiceNo}? Stok barang akan dikembalikan otomatis.`)) {
@@ -2157,10 +2158,10 @@ async function openOwnerPanel() {
         } catch (e) {
           showToast('Gagal membatalkan transaksi', 'error');
         } finally {
-      hideLoading();
+          hideLoading();
+        }
+      }
     }
-  }
-}
-</script>
+  </script>
 </body>
 </html>
